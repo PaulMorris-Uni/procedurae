@@ -22,8 +22,10 @@ const MODULES=[
 const app=$("#app"), ttl=$("#ttl"), back=$("#back");
 
 function chapterSelect(id,val,withAll=true){
-  return `<select id="${id}" aria-label="Chapitre">${withAll?'<option value="">Tous les chapitres</option>':""}${CH.map(c=>`<option value="${c.id}" ${c.id===val?"selected":""}>${esc(c.titre)}</option>`).join("")}</select>`;
+  const vos=VO.filter(v=>CH.some(c=>c.v===v.id));
+  return `<select id="${id}" aria-label="Chapitre">${withAll?'<option value="">Tous les volets</option>':""}${vos.map(v=>`<optgroup label="${esc(v.titre)}"><option value="v:${v.id}" ${val==="v:"+v.id?"selected":""}>Tout le volet ${esc(v.titre.toLowerCase())}</option>${CH.filter(c=>c.v===v.id).map(c=>`<option value="${c.id}" ${c.id===val?"selected":""}>${esc(c.titre)}</option>`).join("")}</optgroup>`).join("")}</select>`;
 }
+const inSel=(c,val)=>!val||(val.startsWith("v:")?(CH.find(x=>x.id===c)||{}).v===val.slice(2):c===val);
 
 /* ---------- Accueil ---------- */
 function vHome(){
@@ -31,7 +33,7 @@ function vHome(){
   const fb=store.get("fbox",{}); const known=Object.values(fb).filter(b=>b>=4).length;
   app.innerHTML=`<div class="eyebrow">CRFPA · ENM</div><h1>Atelier procédure civile</h1>
   <p class="lead">Révision du programme de procédure civile : cours, entraînement et outils. Votre progression reste enregistrée sur cet appareil.</p>
-  <div class="volets">${VO.map(v=>`<span class="chip ${v.dispo?"on":""}">${esc(v.titre)}${v.dispo?"":" · à venir"}</span>`).join("")}</div>
+  <div class="volets">${VO.map(v=>v.dispo?`<a class="chip on" style="text-decoration:none" href="#cours/v:${v.id}">${esc(v.titre)}</a>`:`<span class="chip">${esc(v.titre)} · à venir</span>`).join("")}</div>
   <div class="stats"><div><b>${done}/${D.qcm.length}</b><span>QCM traités</span></div><div><b>${done?Math.round(ok/done*100):0} %</b><span>QCM réussis</span></div><div><b>${known}/${D.fiches.length}</b><span>Fiches en boîte 4 ou 5</span></div></div>
   <div class="grid" style="margin-top:16px">${MODULES.map(m=>`<a class="tile" href="#${m.id}"><span class="n">${m.n()}</span><b>${m.t}</b><span>${m.d}</span></a>`).join("")}</div>
   <div class="panel install" id="inst" hidden style="margin-top:16px"><span class="small">Installez l'application sur votre écran d'accueil pour l'utiliser hors connexion.</span><button class="btn primary" id="instBtn">Installer</button></div>
@@ -43,7 +45,7 @@ function vHome(){
 
 /* ---------- Cours ---------- */
 function vCours(param){
-  if(param){const c=CH.find(x=>x.id===param); if(!c)return vCours();
+  if(param&&!param.startsWith("v:")){const c=CH.find(x=>x.id===param); if(!c)return vCours();
     const i=CH.indexOf(c), prev=CH[i-1], next=CH[i+1];
     ttl.textContent=c.titre;
     app.innerHTML=`<div class="eyebrow">Chapitre ${i+1} sur ${CH.length}</div><h1>${esc(c.titre)}</h1>
@@ -52,8 +54,10 @@ function vCours(param){
     <div class="panel row" style="margin-top:18px"><a class="btn primary" href="#qcm/${c.id}">QCM du chapitre</a><a class="btn" href="#fiches/${c.id}">Fiches du chapitre</a>${D.juris.some(j=>j.c===c.id)?`<a class="btn" href="#juris/${c.id}">Arrêts du chapitre</a>`:""}</div>
     <div class="row" style="justify-content:space-between;margin-top:14px">${prev?`<a class="btn" href="#cours/${prev.id}">Chapitre précédent</a>`:"<span></span>"}${next?`<a class="btn" href="#cours/${next.id}">Chapitre suivant</a>`:""}</div>`;
     return;}
-  app.innerHTML=`<h1>Fiches de cours</h1><p class="lead">${CH.length} chapitres couvrant le volet procédure civile du programme. Chaque fiche renvoie aux exercices correspondants.</p>
-  <div class="stack">${CH.map((c,i)=>`<a class="tile" href="#cours/${c.id}"><span class="n">Chapitre ${i+1} · ${D.qcm.filter(q=>q.c===c.id).length} QCM · ${D.fiches.filter(f=>f.c===c.id).length} fiches</span><b>${esc(c.titre)}</b><span>${c.sections.map(s=>esc(s.h)).join(" · ")}</span></a>`).join("")}</div>`;
+  const vf=(param||"").startsWith("v:")?param.slice(2):"";
+  app.innerHTML=`<h1>Fiches de cours</h1><p class="lead">${CH.length} chapitres répartis par volet du programme. Chaque fiche renvoie aux exercices correspondants.</p>
+  ${VO.filter(v=>CH.some(c=>c.v===v.id)&&(!vf||v.id===vf)).map(v=>`<h3>${esc(v.titre)}</h3><div class="stack">${CH.filter(c=>c.v===v.id).map(c=>`<a class="tile" href="#cours/${c.id}"><span class="n">Chapitre ${CH.indexOf(c)+1} · ${D.qcm.filter(q=>q.c===c.id).length} QCM · ${D.fiches.filter(f=>f.c===c.id).length} fiches</span><b>${esc(c.titre)}</b><span>${c.sections.map(s=>esc(s.h)).join(" · ")}</span></a>`).join("")}</div>`).join("")}
+  ${vf?`<p style="margin-top:14px"><a class="btn" href="#cours">Tous les volets</a></p>`:""}`;
 }
 
 /* ---------- QCM ---------- */
@@ -69,7 +73,7 @@ function vQcm(param){
     <div class="field"><label for="qn">Longueur de la série</label><select id="qn"><option>10</option><option selected>20</option><option value="999">Toutes</option></select></div>
     <div class="row"><button class="btn primary" id="qgo">Commencer</button><span class="small muted" id="qinfo"></span></div></div>`;
     const info=()=>{const pool=pool_();$("#qinfo").textContent=pool.length+" question"+(pool.length>1?"s":"")+" disponible"+(pool.length>1?"s":"")};
-    const pool_=()=>D.qcm.filter(q=>(!$("#qc").value||q.c===$("#qc").value)&&($("#qm").value==="all"||($("#qm").value==="new"&&!res[q.id])||($("#qm").value==="err"&&res[q.id]&&!res[q.id].ok)));
+    const pool_=()=>D.qcm.filter(q=>inSel(q.c,$("#qc").value)&&($("#qm").value==="all"||($("#qm").value==="new"&&!res[q.id])||($("#qm").value==="err"&&res[q.id]&&!res[q.id].ok)));
     ["qc","qm"].forEach(id=>$("#"+id).onchange=info);info();
     $("#qgo").onclick=()=>{const pool=shuffle(pool_()).slice(0,+$("#qn").value);if(!pool.length)return;qs.list=pool;qs.pos=0;qs.score=0;qs.ans=null;vQcm(param)};
     return;
@@ -100,7 +104,7 @@ let fs_={cur:null,shown:false,c:null};
 function vFiches(param){
   if(fs_.c!==(param||"")){fs_={cur:null,shown:false,c:param||""}}
   const box=store.get("fbox",{});
-  const pool=D.fiches.filter(f=>!fs_.c||f.c===fs_.c);
+  const pool=D.fiches.filter(f=>inSel(f.c,fs_.c));
   const pick=()=>{const w=pool.map(f=>[f,Math.pow(2,5-(box[f.id]||1))]);let r=Math.random()*w.reduce((s,x)=>s+x[1],0);for(const [f,x] of w){r-=x;if(r<=0&&(!fs_.cur||f.id!==fs_.cur.id||pool.length===1))return f}return pool[0]};
   if(!fs_.cur||!pool.includes(fs_.cur))fs_.cur=pick();
   const f=fs_.cur, counts=[0,0,0,0,0]; pool.forEach(x=>counts[(box[x.id]||1)-1]++);
@@ -118,7 +122,7 @@ function vFiches(param){
 /* ---------- Jurisprudence ---------- */
 let jHide=false;
 function vJuris(param){
-  const list=D.juris.filter(j=>!param||j.c===param);
+  const list=D.juris.filter(j=>inSel(j.c,param));
   app.innerHTML=`<h1>Jurisprudence</h1><p class="lead">Les arrêts à connaître pour ce volet. En mode entraînement, la solution est masquée : retrouvez la avant de l'afficher.</p>
   <div class="row" style="margin-bottom:12px">${chapterSelect("jc",param||"")}<label class="row small"><input type="checkbox" id="jh" ${jHide?"checked":""}> Mode entraînement</label></div>
   <div class="stack">${list.map((j,i)=>`<div class="panel"><div class="row" style="justify-content:space-between"><span class="tag">${esc(chName(j.c))}</span></div>
@@ -129,7 +133,7 @@ function vJuris(param){
 }
 
 /* ---------- Tableau des délais ---------- */
-const DUR=["15 jours","1 mois","2 mois","3 mois","6 mois","1 an","2 ans","30 ans"];
+const DUR=["15 jours","1 mois","2 mois","3 mois","5 mois","6 mois","1 an","2 ans","30 ans"];
 let dChecked=false;
 function vDelais(){
   const ans=store.get("dans",{});
