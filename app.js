@@ -221,7 +221,7 @@ function vDoctrine(param){
   if(param!==undefined&&DO[+param]){const d=DO[+param];ttl.textContent="Débat doctrinal";
     app.innerHTML=`<div class="row">${d.c.map(c=>`<a class="tag" href="#cours/${c}" style="text-decoration:none">${esc(chName(c))}</a>`).join(" ")}</div><h1 style="margin-top:8px">${esc(d.titre)}</h1>
     ${d.p.map(x=>{const m=x.match(/^([^.:]{3,40}[.:]) (.*)$/s);return m?`<p><b>${esc(m[1])}</b> ${esc(m[2])}</p>`:`<p>${esc(x)}</p>`}).join("")}
-    <div class="panel small" style="margin-top:14px"><div class="eyebrow">Source${d.th.length>1?"s":""}</div>${d.th.map(k=>`<p style="margin:0 0 6px">${thRef(k)}.</p>`).join("")}<p class="muted" style="margin:0">Les idées des auteurs sont restituées dans nos propres termes ; se reporter aux thèses pour leur formulation exacte.</p></div>`;return;}
+    <div class="panel small" style="margin-top:14px"><div class="eyebrow">Sources</div>${d.th.map(k=>`<p style="margin:0 0 6px">${thRef(k)}.</p>`).join("")}${d.src?`<p style="margin:0 0 6px">${esc(d.src)}</p>`:""}<p class="muted" style="margin:0">Les idées des auteurs sont restituées dans nos propres termes ; se reporter aux thèses pour leur formulation exacte.</p></div>`;return;}
   app.innerHTML=`<h1>Débats doctrinaux</h1><p class="lead">Les controverses à connaître, éclairées par des thèses récentes de droit processuel. Utiles pour l'oral, la dissertation de l'ENM et la discussion en cas pratique.</p>
   <div class="stack">${DO.map((d,k)=>`<a class="tile" href="#doctrine/${k}"><span class="n">${d.c.map(c=>esc(chName(c))).join(" · ")}</span><b>${esc(d.titre)}</b><span>${d.th.map(t=>esc(window.THESES[t].a)).join(", ")}</span></a>`).join("")}</div>
   <h3>Thèses exploitées</h3><div class="panel small">${Object.keys(window.THESES).map(k=>`<p style="margin:0 0 6px">${thRef(k)}.</p>`).join("")}</div>`;
@@ -237,7 +237,7 @@ function vDissert(param){
     <div class="panel" style="margin-top:10px"><p><b>Problématique.</b> ${esc(d.prob)}</p>
     ${d.plan.map(([t,ss])=>`<h3>${esc(t)}</h3>${ss.map(x=>`<p style="margin-left:14px">${esc(x)}</p>`).join("")}`).join("")}
     <h3>Matériaux à mobiliser</h3><p>${d.mat.map(esc).join(" ; ")}.</p>
-    <h3>Doctrine</h3>${d.th.map(t=>`<p class="small">${thRef(t)}.</p>`).join("")}</div></details>
+    <h3>Doctrine et sources</h3>${d.th.map(t=>`<p class="small">${thRef(t)}.</p>`).join("")}${d.src?`<p class="small">${esc(d.src)}</p>`:""}</div></details>
     <p class="note">Méthode : définir les termes, situer l'enjeu, formuler une problématique, puis un plan en deux parties et deux sous parties dont les intitulés répondent à la question posée.</p>`;
     $("#dn").addEventListener("input",e=>{const n=store.get("cas",{});n[k]=e.target.value;store.set("cas",n)});return;}
   app.innerHTML=`<h1>Dissertations</h1><p class="lead">Sujets de réflexion au format de l'épreuve de droit civil et procédure civile de l'ENM. Rédigez votre plan avant d'afficher la proposition de corrigé.</p>
