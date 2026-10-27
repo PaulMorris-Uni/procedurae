@@ -133,7 +133,7 @@ function vJuris(param){
 }
 
 /* ---------- Tableau des délais ---------- */
-const DUR=["15 jours","1 mois","2 mois","3 mois","5 mois","6 mois","1 an","2 ans","30 ans"];
+const DUR=["15 jours","1 mois","2 mois","3 mois","5 mois","6 mois","1 an","2 ans","10 ans","30 ans"];
 let dChecked=false;
 function vDelais(){
   const ans=store.get("dans",{});
