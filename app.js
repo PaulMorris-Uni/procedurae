@@ -40,6 +40,7 @@ const MODULES=[
  {id:"delais",t:"Tableau des délais",d:"Durées à compléter, départ et sanction",n:()=>D.delais.length+" délais"},
  {id:"calcul",t:"Calculateur de délais",d:"Articles 640 à 643, jours fériés inclus",n:()=>"Outil"},
  {id:"qualif",t:"Qualifications",d:"Exception, fin de non recevoir, défense au fond",n:()=>D.qualif.length+" moyens"},
+ {id:"sujets",t:"Sujets d'examen",d:"Sujets au format de chaque concours, corrigés détaillés et grille de notation",n:()=>(window.SUJETS||[]).filter(s=>!conc()||s.conc===conc()).length+" sujets"},
  {id:"cas",t:"Cas pratiques",d:"Énoncés type examen et corrigés rédigés",n:()=>D.cas.length+" cas"},
  {id:"doctrine",t:"Débats doctrinaux",d:"Thèses récentes, controverses et critiques",n:()=>window.DOCTRINE.length+" débats"},
  {id:"dissert",t:"Dissertations",d:"Sujets, problématiques et plans détaillés",n:()=>window.DISSERT.length+" sujets"}
@@ -68,7 +69,7 @@ function vHome(){
   <p class="note"><button class="btn" id="wipe">Effacer toute ma progression</button></p>`;
   app.querySelectorAll("[data-conc]").forEach(b=>b.onclick=()=>{store.set("conc",b.dataset.conc);applyConc();resetViews();vHome()});
   if(deferredPrompt){$("#inst").hidden=false;$("#instBtn").onclick=async()=>{deferredPrompt.prompt();deferredPrompt=null;$("#inst").hidden=true}}
-  $("#wipe").onclick=e=>{const b=e.target;if(b.dataset.c){["qcm","fbox","dans","cas","act","qual"].forEach(k=>store.set(k,{}));store.set("exams",[]);b.textContent="Progression effacée";delete b.dataset.c;setTimeout(()=>route(),800)}else{b.dataset.c=1;b.textContent="Confirmer l'effacement"}};
+  $("#wipe").onclick=e=>{const b=e.target;if(b.dataset.c){["qcm","fbox","dans","cas","act","qual","suj"].forEach(k=>store.set(k,{}));store.set("exams",[]);b.textContent="Progression effacée";delete b.dataset.c;setTimeout(()=>route(),800)}else{b.dataset.c=1;b.textContent="Confirmer l'effacement"}};
 }
 
 /* ---------- Cours ---------- */
@@ -315,6 +316,33 @@ function vBord(){
 const fmtD=d=>d.getDate()+" "+["janv.","févr.","mars","avr.","mai","juin","juil.","août","sept.","oct.","nov.","déc."][d.getMonth()];
 
 function resetViews(){qs=null;fs_={cur:null,shown:false,c:null};qq=null;ex=null}
+/* ---------- Sujets d'examen ---------- */
+const sujNote=s=>{const st=store.get("suj",{})[s.id]||{},ck=st.chk||{};let tot=0,got=0,any=false;s.questions.forEach((q,i)=>q.grille.forEach((g,j)=>{tot+=g[1];if(ck[i+"-"+j]){got+=g[1];any=true}}));return {n:tot?got/tot*20:0,any,done:!!st.done}};
+const fmtN=x=>x.toFixed(1).replace(".",",");
+function vSujets(param){
+  const S=window.SUJETS||[];
+  if(param){const s=S.find(x=>x.id===param);if(!s)return vSujets();const st=store.get("suj",{})[s.id]||{};ttl.textContent=s.titre;
+    const save=fn=>{const a=store.get("suj",{});a[s.id]=a[s.id]||{};fn(a[s.id]);store.set("suj",a)};
+    app.innerHTML=`<span class="tag">${esc(CONC[s.conc].t)} · ${esc(s.type)}${s.duree?" · "+esc(s.duree):""}</span><h1 style="margin-top:8px">${esc(s.titre)}</h1>
+    <div class="panel"><p>${esc(s.enonce)}</p></div>
+    <p class="small muted" style="margin-top:10px">Méthode : rédigez votre réponse avant d'ouvrir le corrigé, puis cochez dans la grille les éléments que vous aviez traités. La note obtenue est une autoévaluation indicative ; les jurys ne publient pas de barème officiel.</p>
+    <div class="stack" style="margin-top:12px">${s.questions.map((q,i)=>`<div class="panel"><h3 style="margin-top:0">${s.questions.length>1?"Question "+(i+1):"Sujet"}</h3><p>${esc(q.q)}</p>
+     <label class="small muted" for="sn${i}">Votre réponse (enregistrée sur cet appareil)</label><textarea id="sn${i}" data-i="${i}" style="min-height:140px">${esc((st.notes||{})[i]||"")}</textarea>
+     <details style="margin-top:10px" ${(st.open||{})[i]?"open":""} data-d="${i}"><summary>Afficher le corrigé et la grille</summary><div class="corr">${q.corr.map(p=>`<p>${esc(p)}</p>`).join("")}</div>
+     <div style="margin-top:10px"><div class="small" style="font-weight:600;margin-bottom:6px">Grille : éléments attendus</div>${q.grille.map((g,j)=>`<label class="opt" style="margin-bottom:6px"><input type="checkbox" data-k="${i}-${j}" ${((st.chk||{})[i+"-"+j])?"checked":""}><span class="t">${esc(g[0])}</span><span class="mono small muted" style="margin-left:auto;white-space:nowrap">${fmtN(g[1])} pt</span></label>`).join("")}</div></details></div>`).join("")}</div>
+    <div class="panel" style="margin-top:14px"><div class="row" style="justify-content:space-between"><b>Note d'autoévaluation</b><span class="big" id="snote">${fmtN(sujNote(s).n)} / 20</span></div>${meter(Math.round(sujNote(s).n*5))}
+    <div class="row" style="margin-top:10px"><button class="btn" id="sdone">${st.done?"Sujet marqué comme traité":"Marquer comme traité"}</button><button class="btn" id="sreset">Effacer mes réponses et ma grille</button></div></div>`;
+    app.querySelectorAll("textarea[data-i]").forEach(x=>x.addEventListener("input",()=>save(o=>{o.notes=o.notes||{};o.notes[x.dataset.i]=x.value})));
+    app.querySelectorAll("details[data-d]").forEach(d=>d.addEventListener("toggle",()=>save(o=>{o.open=o.open||{};o.open[d.dataset.d]=d.open})));
+    app.querySelectorAll("input[data-k]").forEach(x=>x.onchange=()=>{save(o=>{o.chk=o.chk||{};o.chk[x.dataset.k]=x.checked});const n=sujNote(s);$("#snote").textContent=fmtN(n.n)+" / 20";app.querySelector(".panel .bar i").style.width=Math.round(n.n*5)+"%"});
+    $("#sdone").onclick=()=>{save(o=>{o.done=!o.done;o.t=Date.now()});logAct();vSujets(param)};
+    $("#sreset").onclick=e=>{const b=e.target;if(!b.dataset.c){b.dataset.c=1;b.textContent="Confirmer l'effacement";return}const a=store.get("suj",{});delete a[s.id];store.set("suj",a);vSujets(param)};
+    return;}
+  const ks=conc()?[conc()]:Object.keys(CONC);
+  app.innerHTML=`<h1>Sujets d'examen</h1><p class="lead">Sujets originaux reproduisant la forme des épreuves : consultation de 2 heures pour le CRFPA, cas pratique ou composition pour l'ENM, questions à réponse courte pour le concours de greffier. Chaque sujet comporte un corrigé détaillé et une grille d'autoévaluation.</p>${concNote()}
+  ${ks.map(k=>`<h3>${esc(CONC[k].t)}</h3><div class="stack">${S.filter(s=>s.conc===k).map(s=>{const n=sujNote(s);return `<a class="tile" href="#sujets/${s.id}"><span class="n">${esc(s.type)} · ${s.questions.length>1?s.questions.length+" questions":"1 sujet"}${n.done?" · traité":""}${n.any?" · "+fmtN(n.n)+" / 20":""}</span><b>${esc(s.titre)}</b><span>${esc(s.enonce.slice(0,130))}${s.enonce.length>130?"…":""}</span></a>`}).join("")}</div>`).join("")}`;
+}
+
 /* ---------- Examen blanc ---------- */
 let ex=null,exTimer=null;
 function vExam(){
@@ -393,12 +421,12 @@ function vDissert(param){
 }
 
 /* ---------- Routeur ---------- */
-const VIEWS={examen:vExam,bord:vBord,cours:vCours,qcm:vQcm,fiches:vFiches,juris:vJuris,delais:vDelais,calcul:vCalcul,qualif:vQualif,cas:vCas,doctrine:vDoctrine,dissert:vDissert};
+const VIEWS={sujets:vSujets,examen:vExam,bord:vBord,cours:vCours,qcm:vQcm,fiches:vFiches,juris:vJuris,delais:vDelais,calcul:vCalcul,qualif:vQualif,cas:vCas,doctrine:vDoctrine,dissert:vDissert};
 function route(){
   const [v,p]=location.hash.slice(1).split("/");
   const m=MODULES.find(x=>x.id===v);
   back.hidden=!m; ttl.textContent=m?m.t:"Atelier procédure civile";
-  back.href=(p&&["cours","cas","doctrine","dissert"].includes(v))?"#"+v:"#";
+  back.href=(p&&["cours","cas","doctrine","dissert","sujets"].includes(v))?"#"+v:"#";
   (VIEWS[v]||vHome)(p);
   if(!p||v!=="qcm")window.scrollTo(0,0);
 }
