@@ -1,7 +1,7 @@
 {
   "name": "Atelier procédure civile",
   "short_name": "Procédure civile",
-  "description": "Révision de la procédure civile pour le CRFPA, l'ENM et le concours de greffier.",
+  "description": "Révision de la procédure civile pour le CRFPA, l'ENM et le concours de greffier (procédure civile).",
   "lang": "fr",
   "start_url": "./",
   "scope": "./",
