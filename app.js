@@ -7,7 +7,10 @@ const store={get(k,d){try{const v=localStorage.getItem("apc-"+k);return v?JSON.p
 const chName=id=>(CH.find(c=>c.id===id)||{}).titre||id;
 const shuffle=a=>{a=a.slice();for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a};
 const L="ABCDE";
+const dayKey=d=>{d=d||new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
+const logAct=()=>{const a=store.get("act",{}),k=dayKey();a[k]=(a[k]||0)+1;store.set("act",a)};
 const MODULES=[
+ {id:"bord",t:"Tableau de bord",d:"Progression par volet et par chapitre, points faibles",n:()=>"Suivi"},
  {id:"cours",t:"Fiches de cours",d:"Synthèses par chapitre, textes et jurisprudence",n:()=>CH.length+" chapitres"},
  {id:"qcm",t:"QCM",d:"Cinq propositions, une ou plusieurs exactes",n:()=>D.qcm.length+" questions"},
  {id:"fiches",t:"Fiches mémoire",d:"Répétition espacée en cinq boîtes",n:()=>D.fiches.length+" fiches"},
@@ -35,12 +38,13 @@ function vHome(){
   <p class="lead">Révision du programme de procédure civile : cours, entraînement et outils. Votre progression reste enregistrée sur cet appareil.</p>
   <div class="volets">${VO.map(v=>v.dispo?`<a class="chip on" style="text-decoration:none" href="#cours/v:${v.id}">${esc(v.titre)}</a>`:`<span class="chip">${esc(v.titre)} · à venir</span>`).join("")}</div>
   <div class="stats"><div><b>${done}/${D.qcm.length}</b><span>QCM traités</span></div><div><b>${done?Math.round(ok/done*100):0} %</b><span>QCM réussis</span></div><div><b>${known}/${D.fiches.length}</b><span>Fiches en boîte 4 ou 5</span></div></div>
+  <p class="small" style="margin-top:8px"><a href="#bord" style="color:var(--accent)">Voir le tableau de bord détaillé</a></p>
   <div class="grid" style="margin-top:16px">${MODULES.map(m=>`<a class="tile" href="#${m.id}"><span class="n">${m.n()}</span><b>${m.t}</b><span>${m.d}</span></a>`).join("")}</div>
   <div class="panel install" id="inst" hidden style="margin-top:16px"><span class="small">Installez l'application sur votre écran d'accueil pour l'utiliser hors connexion.</span><button class="btn primary" id="instBtn">Installer</button></div>
   <p class="note">Contenus établis d'après le <a href="https://www.legifrance.gouv.fr/codes/texte_lc/LEGITEXT000006070716" target="_blank" rel="noopener">Code de procédure civile</a> et le <a href="https://www.legifrance.gouv.fr/codes/texte_lc/LEGITEXT000006070721" target="_blank" rel="noopener">Code civil</a> applicables au 27 octobre 2026, compte tenu des décrets n° 2023-1391, n° 2024-673, n° 2025-660 et n° 2026-683. Programme de référence : arrêté du 17 octobre 2016 (CRFPA), arrêté du 18 février 2019 (ENM) et arrêté du 29 avril 2016 modifié (concours de greffier des services judiciaires). Contenus confrontés à N. Cayrol, <i>Procédure civile</i>, Dalloz, coll. Cours, 5e éd., 2025. Support d'entraînement : vérifiez toujours les textes en vigueur.</p>
   <p class="note"><button class="btn" id="wipe">Effacer toute ma progression</button></p>`;
   if(deferredPrompt){$("#inst").hidden=false;$("#instBtn").onclick=async()=>{deferredPrompt.prompt();deferredPrompt=null;$("#inst").hidden=true}}
-  $("#wipe").onclick=e=>{const b=e.target;if(b.dataset.c){["qcm","fbox","dans","cas"].forEach(k=>store.set(k,k==="cas"?{}:{}));b.textContent="Progression effacée";delete b.dataset.c;setTimeout(()=>route(),800)}else{b.dataset.c=1;b.textContent="Confirmer l'effacement"}};
+  $("#wipe").onclick=e=>{const b=e.target;if(b.dataset.c){["qcm","fbox","dans","cas","act","qual"].forEach(k=>store.set(k,{}));b.textContent="Progression effacée";delete b.dataset.c;setTimeout(()=>route(),800)}else{b.dataset.c=1;b.textContent="Confirmer l'effacement"}};
 }
 
 /* ---------- Cours ---------- */
@@ -94,7 +98,7 @@ function vQcm(param){
    <div class="row" style="margin-top:14px"><button class="btn primary" id="qnext">${qs.pos+1<qs.list.length?"Question suivante":"Voir le résultat"}</button></div>`})()
   :`<div class="row" style="margin-top:14px"><button class="btn primary" id="qval">Valider</button></div>`}`;
   if(!a)$("#qval").onclick=()=>{const sel=[...app.querySelectorAll("input:checked")].map(x=>+x.dataset.o);if(!sel.length){$("#qval").textContent="Cochez au moins une proposition";return}
-    qs.ans=sel;const ok=isOk(q,sel);if(ok)qs.score++;const r=store.get("qcm",{});r[q.id]={ok,t:Date.now()};store.set("qcm",r);vQcm(param)};
+    qs.ans=sel;const ok=isOk(q,sel);if(ok)qs.score++;const r=store.get("qcm",{}),pr=r[q.id]||{};r[q.id]={ok,t:Date.now(),n:(pr.n||0)+1,k:(pr.k||0)+(ok?1:0)};store.set("qcm",r);logAct();vQcm(param)};
   else $("#qnext").onclick=()=>{qs.pos++;qs.ans=null;qs.order=null;vQcm(param);window.scrollTo(0,0)};
 }
 const isOk=(q,sel)=>{const g=q.o.map((o,k)=>o[1]?k:-1).filter(k=>k>=0);return sel.length===g.length&&g.every(k=>sel.includes(k))};
@@ -116,7 +120,7 @@ function vFiches(param){
   ${fs_.shown?`<div class="expl"><p>${esc(f.a)}</p><div class="ref">${esc(f.r)}</div></div><div class="row"><button class="btn ok" id="fy">Je savais</button><button class="btn ko" id="fn">À revoir</button></div>`:`<div class="row"><button class="btn primary" id="fs">Voir la réponse</button></div>`}</div>`;
   $("#fc").onchange=e=>{location.hash="fiches"+(e.target.value?"/"+e.target.value:"")};
   if(!fs_.shown)$("#fs").onclick=()=>{fs_.shown=true;vFiches(param)};
-  else{const grade=up=>{const b=store.get("fbox",{});b[f.id]=up?Math.min(5,(b[f.id]||1)+1):1;store.set("fbox",b);fs_.shown=false;fs_.cur=null;vFiches(param)};$("#fy").onclick=()=>grade(true);$("#fn").onclick=()=>grade(false)}
+  else{const grade=up=>{const b=store.get("fbox",{});b[f.id]=up?Math.min(5,(b[f.id]||1)+1):1;store.set("fbox",b);logAct();fs_.shown=false;fs_.cur=null;vFiches(param)};$("#fy").onclick=()=>grade(true);$("#fn").onclick=()=>grade(false)}
 }
 
 /* ---------- Jurisprudence ---------- */
@@ -196,7 +200,7 @@ function vQualif(){
   <div class="q-text" style="margin:12px 0 14px">${esc(m[0])}</div>
   <div class="choices">${CAT.map((c,k)=>`<button class="btn ${a!==null?(k===m[1]?"right":(k===a?"wrong":"")):""}" data-k="${k}" ${a!==null?"disabled":""}>${c}</button>`).join("")}</div>
   ${a!==null?`<div class="expl"><p class="${a===m[1]?"v-ok":"v-ko"}">${a===m[1]?"Exact.":"Inexact : "+CAT[m[1]]+"."}</p><p>${esc(m[2])}</p><button class="btn primary" id="qn2">${qq.pos+1<D.qualif.length?"Moyen suivant":"Recommencer ("+qq.ok+"/"+D.qualif.length+")"}</button></div>`:""}</div>`;
-  app.querySelectorAll(".choices .btn").forEach(b=>b.onclick=()=>{if(qq.ans!==null)return;qq.ans=+b.dataset.k;qq.done++;if(qq.ans===m[1])qq.ok++;vQualif()});
+  app.querySelectorAll(".choices .btn").forEach(b=>b.onclick=()=>{if(qq.ans!==null)return;qq.ans=+b.dataset.k;qq.done++;if(qq.ans===m[1])qq.ok++;const qs2=store.get("qual",{});qs2[m[0].slice(0,80)]={ok:qq.ans===m[1],t:Date.now()};store.set("qual",qs2);logAct();vQualif()});
   if(a!==null)$("#qn2").onclick=()=>{if(qq.pos+1>=D.qualif.length)qq=null;else{qq.pos++;qq.ans=null}vQualif()};
 }
 
@@ -213,6 +217,68 @@ function vCas(param){
   <div class="stack">${D.cas.map((c,i)=>`<a class="tile" href="#cas/${i}"><span class="n">${esc(chName(c.c))} · ${c.questions.length} questions</span><b>${esc(c.titre)}</b><span>${esc(c.enonce.slice(0,140))}…</span></a>`).join("")}</div>`;
 }
 
+
+/* ---------- Tableau de bord ---------- */
+function chapStats(){
+  const res=store.get("qcm",{}),box=store.get("fbox",{});
+  return CH.map(c=>{const Q=D.qcm.filter(q=>q.c===c.id),F=D.fiches.filter(x=>x.c===c.id);
+    const qd=Q.filter(q=>res[q.id]),qok=Q.filter(q=>res[q.id]&&res[q.id].ok);
+    const fm=F.filter(x=>(box[x.id]||1)>=4),fseen=F.filter(x=>box[x.id]);
+    const parts=[];if(Q.length)parts.push(qok.length/Q.length);if(F.length)parts.push(F.reduce((s,x)=>s+((box[x.id]||1)-1)/4,0)/F.length);
+    return {c,qt:Q.length,qd:qd.length,qok:qok.length,ft:F.length,fm:fm.length,fseen:fseen.length,
+      m:parts.length?Math.round(parts.reduce((a,b)=>a+b,0)/parts.length*100):null,
+      touched:qd.length+fseen.length>0}});
+}
+const pct=(a,b)=>b?Math.round(a/b*100):0;
+const meter=(v,lab)=>`<div class="bar" role="img" aria-label="${lab||v+" %"}" title="${lab||v+" %"}"><i style="width:${v}%"></i></div>`;
+let bordTab="volets";
+function vBord(){
+  const res=store.get("qcm",{}),box=store.get("fbox",{}),act=store.get("act",{}),qual=store.get("qual",{}),dans=store.get("dans",{});
+  const S=chapStats();
+  const qd=Object.keys(res).filter(id=>D.qcm.some(q=>q.id===id)),qok=qd.filter(id=>res[id].ok);
+  const err=qd.length-qok.length;
+  const fm=D.fiches.filter(x=>(box[x.id]||1)>=4).length;
+  const qv=Object.values(qual),qvok=qv.filter(x=>x.ok).length;
+  const dok=D.delais.filter((x,i)=>dans[i]===x.d).length;
+  // activité sur 28 jours
+  const days=[];for(let k=27;k>=0;k--){const d=new Date();d.setDate(d.getDate()-k);days.push([d,act[dayKey(d)]||0])}
+  const mx=Math.max(1,...days.map(x=>x[1]));
+  let streak=0;for(let k=0;;k++){const d=new Date();d.setDate(d.getDate()-k);const n=act[dayKey(d)]||0;if(n)streak++;else if(k===0)continue;else break;if(k>3650)break}
+  const tot7=days.slice(-7).reduce((s,x)=>s+x[1],0);
+  const JC=["di","lu","ma","me","je","ve","sa"];
+  const vol=VO.filter(v=>CH.some(c=>c.v===v.id)).map(v=>{const cs=S.filter(s=>s.c.v===v.id);const sum=k=>cs.reduce((a,s)=>a+s[k],0);
+    const ms=cs.filter(s=>s.m!==null);return {v,qt:sum("qt"),qd:sum("qd"),qok:sum("qok"),ft:sum("ft"),fm:sum("fm"),m:ms.length?Math.round(ms.reduce((a,s)=>a+s.m,0)/ms.length):0}});
+  const weak=S.filter(s=>s.touched&&s.m!==null).sort((a,b)=>a.m-b.m).slice(0,5);
+  const untouched=S.filter(s=>!s.touched);
+  app.innerHTML=`<h1>Tableau de bord</h1><p class="lead">Votre progression, calculée à partir des réponses enregistrées sur cet appareil. La maîtrise d'un chapitre combine la part de ses QCM réussis et l'avancement de ses fiches dans les boîtes.</p>
+  <div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(120px,1fr))">
+   <div><b>${pct(qd.length,D.qcm.length)} %</b><span>QCM traités (${qd.length}/${D.qcm.length})</span></div>
+   <div><b>${qd.length?pct(qok.length,qd.length):0} %</b><span>QCM réussis à la dernière tentative</span></div>
+   <div><b>${fm}/${D.fiches.length}</b><span>Fiches maîtrisées (boîte 4 ou 5)</span></div>
+   <div><b>${qv.length?qvok+"/"+qv.length:"0"}</b><span>Qualifications justes</span></div>
+   <div><b>${dok}/${D.delais.length}</b><span>Délais exacts</span></div>
+   <div><b>${streak} j</b><span>Série de jours actifs</span></div>
+  </div>
+  <h2 style="margin-top:22px">Activité des quatre dernières semaines</h2>
+  <p class="small muted">${tot7} réponse${tot7>1?"s":""} sur les sept derniers jours. Chaque barre représente un jour (QCM, fiches et qualifications).</p>
+  <div class="panel"><div style="display:flex;align-items:flex-end;gap:2px;height:90px" role="img" aria-label="Nombre de réponses par jour sur 28 jours">
+   ${days.map(([d,n])=>`<div title="${fmtD(d)} : ${n} réponse${n>1?"s":""}" style="flex:1;min-width:0;height:100%;display:flex;align-items:flex-end"><div style="width:100%;height:${n?Math.max(4,n/mx*100):2}%;background:${n?"var(--accent)":"var(--line)"};border-radius:4px 4px 0 0"></div></div>`).join("")}
+  </div><div class="mono small muted" style="display:flex;justify-content:space-between;margin-top:6px"><span>${fmtD(days[0][0])}</span><span>aujourd'hui</span></div></div>
+  <div class="row" style="margin:22px 0 10px"><button class="chip ${bordTab==="volets"?"on":""}" data-t="volets">Par volet</button><button class="chip ${bordTab==="chap"?"on":""}" data-t="chap">Par chapitre</button><button class="chip ${bordTab==="faibles"?"on":""}" data-t="faibles">Points faibles</button></div>
+  <div id="btab">${bordTab==="volets"?`<div class="stack">${vol.map(x=>`<div class="panel"><div class="row" style="justify-content:space-between"><b style="font-family:var(--f-display)">${esc(x.v.titre)}</b><span class="mono">${x.m} %</span></div>${meter(x.m,"Maîtrise "+x.m+" %")}
+     <p class="small muted" style="margin:8px 0 0">QCM : ${x.qd}/${x.qt} traités, ${x.qok} réussis · Fiches : ${x.fm}/${x.ft} maîtrisées</p>
+     <div class="row" style="margin-top:8px"><a class="btn" href="#qcm/v:${x.v.id}">QCM du volet</a><a class="btn" href="#fiches/v:${x.v.id}">Fiches du volet</a></div></div>`).join("")}</div>`
+   :bordTab==="chap"?`<div class="stack">${VO.filter(v=>CH.some(c=>c.v===v.id)).map(v=>`<div class="panel"><div class="eyebrow">${esc(v.titre)}</div>${S.filter(s=>s.c.v===v.id).map(s=>`<div style="padding:10px 0;border-top:1px solid var(--line)"><div style="display:flex;gap:10px;align-items:baseline"><span style="flex:1;min-width:0">${esc(s.c.titre)}</span><span class="mono small" style="white-space:nowrap">${s.m===null?"sans exercice":s.touched?s.m+" %":"non commencé"}</span></div>${s.m===null?"":meter(s.m||0)}
+     <div class="small muted" style="margin-top:6px">QCM ${s.qt?s.qok+"/"+s.qt:"aucun"} · Fiches ${s.ft?s.fm+"/"+s.ft:"aucune"} · ${s.qt?`<a href="#qcm/${s.c.id}" style="color:var(--accent)">QCM</a> · `:""}<a href="#cours/${s.c.id}" style="color:var(--accent)">Cours</a></div></div>`).join("")}</div>`).join("")}</div>`
+   :`${weak.length?`<p class="small muted">Les cinq chapitres commencés dont la maîtrise est la plus faible.</p><div class="stack">${weak.map(s=>`<div class="panel"><div style="display:flex;gap:10px;align-items:baseline"><span style="flex:1;min-width:0"><span class="tag">${esc((VO.find(v=>v.id===s.c.v)||{}).titre||"")}</span> <b>${esc(s.c.titre)}</b></span><span class="mono" style="white-space:nowrap">${s.m} %</span></div>${meter(s.m)}
+     <p class="small muted" style="margin:8px 0 0">${s.qd-s.qok>0?(s.qd-s.qok)+" QCM à reprendre · ":""}${s.ft-s.fm>0?(s.ft-s.fm)+" fiche"+(s.ft-s.fm>1?"s":"")+" à consolider":"Fiches maîtrisées"}</p>
+     <div class="row" style="margin-top:8px"><a class="btn primary" href="#cours/${s.c.id}">Relire le cours</a>${s.qt?`<a class="btn" href="#qcm/${s.c.id}">QCM</a>`:""}${s.ft?`<a class="btn" href="#fiches/${s.c.id}">Fiches</a>`:""}</div></div>`).join("")}</div>`:`<div class="panel"><p class="muted">Aucun chapitre commencé pour l'instant : répondez à quelques QCM ou fiches pour faire apparaître vos points faibles.</p></div>`}
+     ${err?`<div class="warn">${err} QCM en erreur à la dernière tentative : dans le module QCM, choisissez « Mes erreurs » pour les reprendre.</div>`:""}
+     ${untouched.length?`<p class="small muted" style="margin-top:14px">Chapitres non commencés (${untouched.length}) : ${untouched.map(s=>`<a href="#cours/${s.c.id}" style="color:var(--accent)">${esc(s.c.titre)}</a>`).join(", ")}.</p>`:""}`}</div>
+  <p class="note">Les résultats sont enregistrés sur ce seul appareil. Les QCM sont comptés selon la dernière tentative ; les qualifications et l'activité ne sont suivies que depuis la version 8.</p>`;
+  app.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{bordTab=b.dataset.t;vBord()});
+}
+const fmtD=d=>d.getDate()+" "+["janv.","févr.","mars","avr.","mai","juin","juil.","août","sept.","oct.","nov.","déc."][d.getMonth()];
 
 /* ---------- Doctrine ---------- */
 const thRef=k=>{const t=window.THESES[k];return `${esc(t.a)}, <i>${esc(t.t)}</i>, ${esc(t.u)}`};
@@ -245,7 +311,7 @@ function vDissert(param){
 }
 
 /* ---------- Routeur ---------- */
-const VIEWS={cours:vCours,qcm:vQcm,fiches:vFiches,juris:vJuris,delais:vDelais,calcul:vCalcul,qualif:vQualif,cas:vCas,doctrine:vDoctrine,dissert:vDissert};
+const VIEWS={bord:vBord,cours:vCours,qcm:vQcm,fiches:vFiches,juris:vJuris,delais:vDelais,calcul:vCalcul,qualif:vQualif,cas:vCas,doctrine:vDoctrine,dissert:vDissert};
 function route(){
   const [v,p]=location.hash.slice(1).split("/");
   const m=MODULES.find(x=>x.id===v);
