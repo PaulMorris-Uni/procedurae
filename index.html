@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Atelier procédure civile</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="theme-color" content="#23386b">
+<meta name="description" content="Révision de la procédure civile pour le CRFPA et l'ENM : cours, QCM, fiches, jurisprudence, délais, qualifications et cas pratiques.">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout : barre supérieure collante avec retour, accueil en grille de modules, une vue à la fois, colonne de 760px */
+:root{
+  --bg:#f3f4f7; --paper:#ffffff; --ink:#1b2333; --muted:#5b6478; --line:#d9dde6;
+  --accent:#23386b; --accent-ink:#ffffff; --accent-soft:#e3e8f4; --ok:#1f7a4d; --ok-soft:#e2f2e9; --ko:#a3312b; --ko-soft:#f8e4e2; --warn:#8a5a00; --warn-soft:#fbf0d9;
+  --f-display:"Libre Caslon Text", Georgia, "Times New Roman", serif;
+  --f-body:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12161f; --paper:#1a202c; --ink:#e6e9f0; --muted:#9aa3b5; --line:#2c3445;
+  --accent:#9db3e8; --accent-ink:#12161f; --accent-soft:#25304a; --ok:#6fcf9b; --ok-soft:#173326; --ko:#ef8a82; --ko-soft:#3a1e1c; --warn:#e8c06a; --warn-soft:#3a2f16; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12161f; --paper:#1a202c; --ink:#e6e9f0; --muted:#9aa3b5; --line:#2c3445;
+  --accent:#9db3e8; --accent-ink:#12161f; --accent-soft:#25304a; --ok:#6fcf9b; --ok-soft:#173326; --ko:#ef8a82; --ko-soft:#3a1e1c; --warn:#e8c06a; --warn-soft:#3a2f16; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55;margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);border-bottom:1px solid var(--line)}
+.top .in{max-width:760px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:10px;display:flex;align-items:center;gap:10px;min-height:52px}
+.top a.back{text-decoration:none;color:var(--accent);font-weight:600;font-size:.9rem;padding:4px 0}
+.top .ttl{font-family:var(--f-display);font-size:1.05rem;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wrap{max-width:760px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 72px}
+.eyebrow{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:6px}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(1.6rem,5vw,2.1rem);line-height:1.15;margin:0 0 6px;text-wrap:balance}
+h2{font-family:var(--f-display);font-weight:400;font-size:1.3rem;line-height:1.3;margin:0 0 6px;text-wrap:balance}
+h3{font-family:var(--f-display);font-weight:700;font-size:1.05rem;margin:18px 0 6px}
+p{margin:0 0 10px;max-width:68ch}
+.muted{color:var(--muted)} .small{font-size:.84rem}
+.lead{color:var(--muted);max-width:62ch}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:16px}
+.stack{display:grid;gap:12px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+a.tile{display:flex;flex-direction:column;gap:4px;text-decoration:none;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:14px;min-width:0}
+a.tile:hover{border-color:var(--accent)}
+a.tile b{font-family:var(--f-display);font-weight:700;font-size:1.02rem}
+a.tile span{font-size:.82rem;color:var(--muted)}
+a.tile .n{font-family:var(--f-mono);font-size:.75rem;color:var(--accent)}
+.volets{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 18px}
+.chip{font-size:.78rem;padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--paper);color:var(--muted)}
+.chip.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.tag{font-family:var(--f-mono);font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;background:var(--accent-soft);color:var(--accent);padding:2px 7px;border-radius:4px;display:inline-block}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.ref{font-family:var(--f-mono);font-size:.78rem;color:var(--accent)}
+select,input,button,textarea{font:inherit;font-size:.9rem}
+select,input[type=date],input[type=number],textarea{padding:8px 10px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:6px;max-width:100%}
+textarea{width:100%;min-height:90px;resize:vertical}
+.btn{padding:9px 14px;border-radius:6px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;text-decoration:none;display:inline-block}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.btn.ok{border-color:var(--ok);color:var(--ok)} .btn.ko{border-color:var(--ko);color:var(--ko)}
+.btn[disabled]{opacity:.45;cursor:default}
+a:focus-visible,.btn:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible,label.opt:focus-within{outline:2px solid var(--accent);outline-offset:2px}
+.bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stats div{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:10px;text-align:center}
+.stats b{display:block;font-family:var(--f-mono);font-size:1.2rem;font-weight:500}
+.stats span{font-size:.72rem;color:var(--muted)}
+/* QCM */
+.opts{display:grid;gap:7px;margin-top:10px}
+label.opt{display:flex;gap:10px;align-items:flex-start;padding:10px 11px;border:1px solid var(--line);border-radius:6px;cursor:pointer;background:var(--paper)}
+label.opt input{margin-top:4px;accent-color:var(--accent);flex:none}
+label.opt .L{font-family:var(--f-mono);font-size:.8rem;color:var(--muted);flex:none;margin-top:2px}
+label.opt span.t{min-width:0}
+label.opt.good{border-color:var(--ok);background:var(--ok-soft)} label.opt.bad{border-color:var(--ko);background:var(--ko-soft)} label.opt.miss{border-color:var(--ok);border-style:dashed}
+.q-text{font-family:var(--f-display);font-size:1.1rem;line-height:1.45}
+.verdict{font-weight:600} .v-ok{color:var(--ok);font-weight:600} .v-ko{color:var(--ko);font-weight:600}
+.expl{border-top:1px solid var(--line);padding-top:12px;margin-top:12px}
+/* Fiches */
+.boxes{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.boxes div{border:1px solid var(--line);border-radius:6px;padding:6px 2px;text-align:center;font-size:.7rem;color:var(--muted);background:var(--paper)}
+.boxes b{display:block;font-family:var(--f-mono);font-size:1rem;color:var(--ink);font-weight:500}
+/* Tableaux */
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:.86rem}
+th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500}
+tr.good td:first-child{box-shadow:inset 3px 0 var(--ok)} tr.bad td:first-child{box-shadow:inset 3px 0 var(--ko)}
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px}
+.choices .btn{text-align:left}
+.choices .btn.right{border-color:var(--ok);background:var(--ok-soft)} .choices .btn.wrong{border-color:var(--ko);background:var(--ko-soft)}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label{font-size:.8rem;color:var(--muted);font-weight:500}
+.f2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.big{font-family:var(--f-display);font-size:1.4rem;line-height:1.3}
+ol.steps{padding-left:20px;font-size:.9rem;margin:10px 0 0} ol.steps li{margin-bottom:4px}
+.warn{background:var(--warn-soft);color:var(--warn);border-radius:6px;padding:8px 10px;font-size:.84rem;margin-top:10px}
+.corr{background:var(--accent-soft);border-radius:6px;padding:12px;margin-top:8px;font-size:.92rem}
+details summary{cursor:pointer;font-weight:600;color:var(--accent)}
+.sec p{font-size:.95rem}
+.note{margin-top:28px;font-size:.78rem;color:var(--muted)} .note a{color:var(--accent)}
+.install{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top"><div class="in"><a class="back" id="back" href="#" hidden>‹ Retour</a><div class="ttl" id="ttl">Atelier procédure civile</div></div></header>
+<main class="wrap" id="app"></main>
+<script src="js/cours.js"></script>
+<script src="js/data.js"></script>
+<script src="js/doctrine.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "Atelier procédure civile",
+  "short_name": "Procédure civile",
+  "description": "Révision de la procédure civile pour le CRFPA et l'ENM.",
+  "lang": "fr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f3f4f7",
+  "theme_color": "#23386b",
+  "icons": [
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png"},
+    {"src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}
