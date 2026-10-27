@@ -7,6 +7,33 @@ const store={get(k,d){try{const v=localStorage.getItem("apc-"+k);return v?JSON.p
 const chName=id=>(CH.find(c=>c.id===id)||{}).titre||id;
 const shuffle=a=>{a=a.slice();for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a};
 const L="ABCDE";
+const SV=p=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
+const ICO={
+ bord:SV('<path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/>'),
+ cours:SV('<path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 21.5V4.5"/><path d="M8 7h8M8 11h6"/>'),
+ examen:SV('<circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2"/><path d="M9 2h6"/>'),
+ qcm:SV('<rect x="3" y="3" width="18" height="18" rx="3"/><path d="m8 12 3 3 5-6"/>'),
+ fiches:SV('<rect x="6" y="3" width="15" height="13" rx="2"/><path d="M3 7v11a3 3 0 0 0 3 3h11"/>'),
+ juris:SV('<path d="M12 3v18"/><path d="M5 21h14"/><path d="M4 7h16"/><path d="m4 7-2 6a3 3 0 0 0 4 0z"/><path d="m20 7-2 6a3 3 0 0 0 4 0z"/>'),
+ delais:SV('<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/><path d="M8 14h3M8 17h6"/>'),
+ calcul:SV('<rect x="5" y="2" width="14" height="20" rx="2"/><path d="M8 6h8"/><path d="M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 18h.01M12 18h4"/>'),
+ qualif:SV('<path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/>'),
+ sujets:SV('<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/>'),
+ cas:SV('<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M2 13h20"/>'),
+ doctrine:SV('<path d="M7 7h4v4c0 3-2 5-4 6"/><path d="M15 7h4v4c0 3-2 5-4 6"/>'),
+ dissert:SV('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>'),
+ recherche:SV('<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>'),
+ favoris:SV('<path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.2l1.1-6.2L3 9.6l6.2-.9z"/>'),
+ imprimer:SV('<path d="M6 9V2h12v7"/><rect x="2" y="9" width="20" height="9" rx="2"/><path d="M6 14h12v8H6z"/>')
+};
+const VCOL={pc:"var(--v-pc)",mard:"var(--v-mard)",arb:"var(--v-arb)",pce:"var(--v-pce)"};
+const vcOf=c=>VCOL[(CH.find(x=>x.id===c)||{}).v]||"var(--accent)";
+const tagCh=c=>`<span class="tag" style="--vc:${vcOf(c)}">${esc(chName(c))}</span>`;
+const favs=()=>store.get("fav",{});
+const isFav=k=>!!favs()[k];
+const starBtn=(k,label)=>`<button class="star ${isFav(k)?"on":""}" data-fav="${esc(k)}" aria-pressed="${isFav(k)}" aria-label="${isFav(k)?"Retirer des favoris":"Ajouter aux favoris"} : ${esc(label||"")}" title="Favori">${SV('<path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.2l1.1-6.2L3 9.6l6.2-.9z"/>')}</button>`;
+document.addEventListener("click",e=>{const b=e.target.closest("[data-fav]");if(!b)return;e.preventDefault();const k=b.dataset.fav,f=favs();if(f[k])delete f[k];else f[k]=Date.now();store.set("fav",f);const on=!!f[k];b.classList.toggle("on",on);b.setAttribute("aria-pressed",on);b.setAttribute("aria-label",(on?"Retirer des favoris":"Ajouter aux favoris"));if(location.hash.startsWith("#favoris")&&!on)setTimeout(()=>route(),150)});
+const norm=s=>String(s).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
 /* Concours : chapitres relevant du programme de procédure civile de chaque épreuve.
    CRFPA : arrêté du 17 octobre 2016 modifié (procédure civile, modes amiables, arbitrage, procédures civiles d'exécution).
    ENM : arrêté du 31 décembre 2008 modifié, épreuve de droit civil et procédure civile (rubriques A à J).
@@ -31,19 +58,21 @@ function recordQ(q,ok){const r=store.get("qcm",{}),pr=r[q.id]||{},b=ok?Math.min(
 const dayKey=d=>{d=d||new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
 const logAct=()=>{const a=store.get("act",{}),k=dayKey();a[k]=(a[k]||0)+1;store.set("act",a)};
 const MODULES=[
- {id:"bord",t:"Tableau de bord",d:"Progression par volet et par chapitre, points faibles",n:()=>"Suivi"},
- {id:"cours",t:"Fiches de cours",d:"Synthèses par chapitre, textes et jurisprudence",n:()=>CH.length+" chapitres"},
- {id:"examen",t:"Examen blanc",d:"Série chronométrée notée sur 20, correction à la fin",n:()=>"Épreuve"},
- {id:"qcm",t:"QCM",d:"Cinq propositions, une ou plusieurs exactes",n:()=>D.qcm.length+" questions"},
- {id:"fiches",t:"Fiches mémoire",d:"Répétition espacée en cinq boîtes",n:()=>D.fiches.length+" fiches"},
- {id:"juris",t:"Jurisprudence",d:"Grands arrêts : solution et portée",n:()=>D.juris.length+" arrêts"},
- {id:"delais",t:"Tableau des délais",d:"Durées à compléter, départ et sanction",n:()=>D.delais.length+" délais"},
- {id:"calcul",t:"Calculateur de délais",d:"Articles 640 à 643, jours fériés inclus",n:()=>"Outil"},
- {id:"qualif",t:"Qualifications",d:"Exception, fin de non recevoir, défense au fond",n:()=>D.qualif.length+" moyens"},
- {id:"sujets",t:"Sujets d'examen",d:"Sujets au format de chaque concours, corrigés détaillés et grille de notation",n:()=>(window.SUJETS||[]).filter(s=>!conc()||s.conc===conc()).length+" sujets"},
- {id:"cas",t:"Cas pratiques",d:"Énoncés type examen et corrigés rédigés",n:()=>D.cas.length+" cas"},
- {id:"doctrine",t:"Débats doctrinaux",d:"Thèses récentes, controverses et critiques",n:()=>window.DOCTRINE.length+" débats"},
- {id:"dissert",t:"Dissertations",d:"Sujets, problématiques et plans détaillés",n:()=>window.DISSERT.length+" sujets"}
+ {id:"recherche",g:"o",t:"Recherche",d:"Dans les cours, fiches, QCM, arrêts et sujets",n:()=>"Outil"},
+ {id:"favoris",g:"o",t:"Favoris",d:"Questions, fiches, arrêts et chapitres mis de côté",n:()=>Object.keys(favs()).length+" favori"+(Object.keys(favs()).length>1?"s":"")},
+ {id:"bord",g:"o",t:"Tableau de bord",d:"Progression par volet et par chapitre, points faibles",n:()=>"Suivi"},
+ {id:"cours",g:"a",t:"Fiches de cours",d:"Synthèses par chapitre, textes et jurisprudence",n:()=>CH.length+" chapitres"},
+ {id:"examen",g:"e",t:"Examen blanc",d:"Série chronométrée notée sur 20, correction à la fin",n:()=>"Épreuve"},
+ {id:"qcm",g:"e",t:"QCM",d:"Cinq propositions, une ou plusieurs exactes",n:()=>D.qcm.length+" questions"},
+ {id:"fiches",g:"a",t:"Fiches mémoire",d:"Répétition espacée en cinq boîtes",n:()=>D.fiches.length+" fiches"},
+ {id:"juris",g:"a",t:"Jurisprudence",d:"Grands arrêts : solution et portée",n:()=>D.juris.length+" arrêts"},
+ {id:"delais",g:"e",t:"Tableau des délais",d:"Durées à compléter, départ et sanction",n:()=>D.delais.length+" délais"},
+ {id:"calcul",g:"o",t:"Calculateur de délais",d:"Articles 640 à 643, jours fériés inclus",n:()=>"Outil"},
+ {id:"qualif",g:"e",t:"Qualifications",d:"Exception, fin de non recevoir, défense au fond",n:()=>D.qualif.length+" moyens"},
+ {id:"sujets",g:"e",t:"Sujets d'examen",d:"Sujets au format de chaque concours, corrigés détaillés et grille de notation",n:()=>(window.SUJETS||[]).filter(s=>!conc()||s.conc===conc()).length+" sujets"},
+ {id:"cas",g:"e",t:"Cas pratiques",d:"Énoncés type examen et corrigés rédigés",n:()=>D.cas.length+" cas"},
+ {id:"doctrine",g:"a",t:"Débats doctrinaux",d:"Thèses récentes, controverses et critiques",n:()=>window.DOCTRINE.length+" débats"},
+ {id:"dissert",g:"a",t:"Dissertations",d:"Sujets, problématiques et plans détaillés",n:()=>window.DISSERT.length+" sujets"}
 ];
 const app=$("#app"), ttl=$("#ttl"), back=$("#back");
 
@@ -55,21 +84,28 @@ const inSel=(c,val)=>!val||(val.startsWith("v:")?(CH.find(x=>x.id===c)||{}).v===
 
 /* ---------- Accueil ---------- */
 function vHome(){
-  const qs=store.get("qcm",{}); const done=Object.keys(qs).length, ok=Object.values(qs).filter(x=>x.ok).length;
-  const fb=store.get("fbox",{}); const known=Object.values(fb).filter(b=>b>=4).length;
-  app.innerHTML=`<div class="eyebrow">CRFPA · ENM · Greffier (procédure civile)</div><h1>Atelier procédure civile</h1>
-  <p class="lead">Révision du programme de procédure civile : cours, entraînement et outils. Votre progression reste enregistrée sur cet appareil.</p>
-  <div class="panel" style="margin:14px 0"><div class="small muted" style="margin-bottom:6px">Mon concours : le contenu proposé suit son programme de procédure civile.</div><div class="row">${[["","Tous"]].concat(Object.keys(CONC).map(k=>[k,CONC[k].t])).map(([k,n])=>`<button class="chip ${conc()===k?"on":""}" data-conc="${k}">${esc(n)}</button>`).join("")}</div>${conc()?`<p class="small" style="margin:10px 0 0">${esc(CONC[conc()].ep)}</p><p class="small muted" style="margin:6px 0 0">${esc(CONC[conc()].ref)}.</p>`:""}</div>
-  <div class="volets">${VO.map(v=>v.dispo?`<a class="chip on" style="text-decoration:none" href="#cours/v:${v.id}">${esc(v.titre)}</a>`:`<span class="chip">${esc(v.titre)} · à venir</span>`).join("")}</div>
-  <div class="stats"><div><b>${done}/${D.qcm.length}</b><span>QCM traités</span></div><div><b>${done?Math.round(ok/done*100):0} %</b><span>QCM réussis</span></div><div><b>${known}/${D.fiches.length}</b><span>Fiches en boîte 4 ou 5</span></div></div>
-  <p class="small" style="margin-top:8px"><a href="#bord" style="color:var(--accent)">Voir le tableau de bord détaillé</a></p>
-  <div class="grid" style="margin-top:16px">${MODULES.map(m=>`<a class="tile" href="#${m.id}"><span class="n">${m.n()}</span><b>${m.t}</b><span>${m.d}</span></a>`).join("")}</div>
+  app.style.removeProperty("--vc");
+  const qs=store.get("qcm",{}); const done=Object.keys(qs).filter(id=>D.qcm.some(q=>q.id===id)), ok=done.filter(id=>qs[id].ok).length;
+  const fb=store.get("fbox",{}); const known=D.fiches.filter(f=>(fb[f.id]||1)>=4).length;
+  const due=D.qcm.filter(q=>qDue(qs[q.id])).length;
+  const GR=[["a","Apprendre"],["e","S'entraîner"],["o","Suivre et chercher"]];
+  const VID={pc:"cours",mard:"cours",arb:"cours",pce:"cours"};
+  app.innerHTML=`<section class="cover"><div class="eyebrow">CRFPA · ENM · Greffier (procédure civile)</div><h1>Atelier procédure civile</h1>
+  <p class="lead">Cours, entraînement et outils pour réviser la procédure civile. Votre progression reste enregistrée sur cet appareil.</p>
+  <div class="maj">Textes à jour au 27 octobre 2026</div>
+  <div class="row" style="margin-top:16px">${[["","Tous"]].concat(Object.keys(CONC).map(k=>[k,CONC[k].t])).map(([k,n])=>`<button class="chip ${conc()===k?"on":""}" data-conc="${k}">${esc(n)}</button>`).join("")}</div>
+  ${conc()?`<p class="concinfo">${esc(CONC[conc()].ep)} <span style="opacity:.8">${esc(CONC[conc()].ref)}.</span></p>`:`<p class="concinfo">Choisissez votre concours pour n'afficher que son programme.</p>`}
+  <div class="stats"><div><b>${done.length}/${D.qcm.length}</b><span>QCM traités</span></div><div><b>${done.length?Math.round(ok/done.length*100):0} %</b><span>QCM réussis</span></div><div><b>${known}/${D.fiches.length}</b><span>Fiches maîtrisées</span></div></div>
+  </section>
+  <div class="volets">${VO.filter(v=>CH.some(c=>c.v===v.id&&inConc(c.id))).map(v=>`<a class="vchip" style="--vc:${VCOL[v.id]}" href="#cours/v:${v.id}"><i></i>${esc(v.titre)}</a>`).join("")}</div>
+  <div class="row" style="margin-top:14px">${due?`<a class="btn primary" href="#qcm">${due} QCM à réviser aujourd'hui</a>`:`<a class="btn primary" href="#qcm">Lancer une série de QCM</a>`}<a class="btn" href="#bord">${ICO.bord.replace('<svg','<svg width="18" height="18"')} Tableau de bord</a></div>
+  ${GR.map(([g,lab])=>`<div class="grp">${lab}</div><div class="grid">${MODULES.filter(m=>m.g===g).map((m,i,arr)=>`<a class="tile ${i<(3-arr.length%3)%3?"wide":""}" href="#${m.id}"><span class="ico">${ICO[m.id]||""}</span><span class="n">${m.n()}</span><b>${m.t}</b><span>${m.d}</span></a>`).join("")}</div>`).join("")}
   <div class="panel install" id="inst" hidden style="margin-top:16px"><span class="small">Installez l'application sur votre écran d'accueil pour l'utiliser hors connexion.</span><button class="btn primary" id="instBtn">Installer</button></div>
   <p class="note">Contenus établis d'après le <a href="https://www.legifrance.gouv.fr/codes/texte_lc/LEGITEXT000006070716" target="_blank" rel="noopener">Code de procédure civile</a> et le <a href="https://www.legifrance.gouv.fr/codes/texte_lc/LEGITEXT000006070721" target="_blank" rel="noopener">Code civil</a> applicables au 27 octobre 2026, compte tenu des décrets n° 2023-1391, n° 2024-673, n° 2025-660 et n° 2026-683. Programme de référence : arrêté du 17 octobre 2016 modifié (CRFPA), arrêté du 31 décembre 2008 modifié (ENM) et arrêté du 29 avril 2016 modifié (concours de greffier des services judiciaires, partie procédure civile). Contenus confrontés à N. Cayrol, <i>Procédure civile</i>, Dalloz, coll. Cours, 5e éd., 2025. Support d'entraînement : vérifiez toujours les textes en vigueur.</p>
   <p class="note"><button class="btn" id="wipe">Effacer toute ma progression</button></p>`;
   app.querySelectorAll("[data-conc]").forEach(b=>b.onclick=()=>{store.set("conc",b.dataset.conc);applyConc();resetViews();vHome()});
   if(deferredPrompt){$("#inst").hidden=false;$("#instBtn").onclick=async()=>{deferredPrompt.prompt();deferredPrompt=null;$("#inst").hidden=true}}
-  $("#wipe").onclick=e=>{const b=e.target;if(b.dataset.c){["qcm","fbox","dans","cas","act","qual","suj"].forEach(k=>store.set(k,{}));store.set("exams",[]);b.textContent="Progression effacée";delete b.dataset.c;setTimeout(()=>route(),800)}else{b.dataset.c=1;b.textContent="Confirmer l'effacement"}};
+  $("#wipe").onclick=e=>{const b=e.target;if(b.dataset.c){["qcm","fbox","dans","cas","act","qual","suj","fav"].forEach(k=>store.set(k,{}));store.set("exams",[]);b.textContent="Progression effacée";delete b.dataset.c;setTimeout(()=>route(),800)}else{b.dataset.c=1;b.textContent="Confirmer l'effacement"}};
 }
 
 /* ---------- Cours ---------- */
@@ -77,7 +113,7 @@ function vCours(param){
   if(param&&!param.startsWith("v:")){const c=CH.find(x=>x.id===param); if(!c)return vCours();
     const i=CH.indexOf(c), prev=CH[i-1], next=CH[i+1];
     ttl.textContent=c.titre;
-    app.innerHTML=`<div class="eyebrow">Chapitre ${i+1} sur ${CH.length}${inConc(c.id)?"":" · hors programme "+esc(CONC[conc()].t)}</div><h1>${esc(c.titre)}</h1>
+    app.style.setProperty("--vc",vcOf(c.id));app.innerHTML=`<div class="row" style="justify-content:space-between;align-items:flex-start;gap:12px"><div style="min-width:0"><div class="eyebrow" style="color:var(--vc)">${esc((VO.find(v=>v.id===c.v)||{}).titre||"")} · Chapitre ${i+1} sur ${CH.length}${inConc(c.id)?"":" · hors programme "+esc(CONC[conc()].t)}</div><h1>${esc(c.titre)}</h1></div><div class="row noprint" style="gap:6px;flex:none">${starBtn("c:"+c.id,c.titre)}<a class="star" href="#imprimer/${c.id}" aria-label="Imprimer le chapitre" title="Imprimer ou enregistrer en PDF">${ICO.imprimer}</a></div></div>
     ${c.sections.map(s=>`<div class="sec"><h3>${esc(s.h)}</h3>${s.p.map(p=>`<p>${esc(p)}</p>`).join("")}</div>`).join("")}
     ${(()=>{const ds=window.DOCTRINE.map((d,k)=>[d,k]).filter(([d])=>d.c.includes(c.id));return ds.length?`<h3>Débats doctrinaux</h3><div class="stack">${ds.map(([d,k])=>`<a class="tile" href="#doctrine/${k}"><span class="n">${d.th.map(t=>esc(window.THESES[t].a)).join(" · ")}</span><b>${esc(d.titre)}</b></a>`).join("")}</div>`:""})()}
     <div class="panel row" style="margin-top:18px"><a class="btn primary" href="#qcm/${c.id}">QCM du chapitre</a><a class="btn" href="#fiches/${c.id}">Fiches du chapitre</a>${D.juris.some(j=>j.c===c.id)?`<a class="btn" href="#juris/${c.id}">Arrêts du chapitre</a>`:""}</div>
@@ -98,11 +134,11 @@ function vQcm(param){
     const c=param||"";
     app.innerHTML=`<h1>QCM</h1><p class="lead">Chaque question admet une ou plusieurs réponses exactes ; seule la combinaison complète est comptée juste. En répétition espacée, une question ratée revient le lendemain, une question réussie revient après 1, 3, 7 puis 15 jours.</p>${concNote()}
     <div class="panel stack"><div class="field"><label for="qc">Chapitre</label>${chapterSelect("qc",c)}</div>
-    <div class="field"><label for="qm">Questions</label><select id="qm"><option value="rev">À réviser aujourd'hui (répétition espacée)</option><option value="all">Toutes</option><option value="new">Jamais traitées</option><option value="err">Mes erreurs</option></select></div>
+    <div class="field"><label for="qm">Questions</label><select id="qm"><option value="rev">À réviser aujourd'hui (répétition espacée)</option><option value="all">Toutes</option><option value="new">Jamais traitées</option><option value="err">Mes erreurs</option><option value="fav">Mes favoris</option></select></div>
     <div class="field"><label for="qn">Longueur de la série</label><select id="qn"><option>10</option><option selected>20</option><option value="999">Toutes</option></select></div>
     <div class="row"><button class="btn primary" id="qgo">Commencer</button><span class="small muted" id="qinfo"></span></div></div>`;
     const info=()=>{const pool=pool_();$("#qinfo").textContent=pool.length+" question"+(pool.length>1?"s":"")+" disponible"+(pool.length>1?"s":"")};
-    const pool_=()=>D.qcm.filter(q=>inSel(q.c,$("#qc").value)&&($("#qm").value==="all"||($("#qm").value==="rev"&&qDue(res[q.id]))||($("#qm").value==="new"&&!res[q.id])||($("#qm").value==="err"&&res[q.id]&&!res[q.id].ok)));
+    const pool_=()=>D.qcm.filter(q=>inSel(q.c,$("#qc").value)&&($("#qm").value==="all"||($("#qm").value==="fav"&&isFav("q:"+q.id))||($("#qm").value==="rev"&&qDue(res[q.id]))||($("#qm").value==="new"&&!res[q.id])||($("#qm").value==="err"&&res[q.id]&&!res[q.id].ok)));
     ["qc","qm"].forEach(id=>$("#"+id).onchange=info);info();
     $("#qgo").onclick=()=>{const p0=pool_(),pool=($("#qm").value==="rev"?shuffle(p0).sort((a,b)=>qBox(res[a.id])-qBox(res[b.id])||res[a.id].t-res[b.id].t):shuffle(p0)).slice(0,+$("#qn").value);if(!pool.length){$("#qinfo").textContent=$("#qm").value==="rev"?"Aucune question à réviser aujourd'hui : choisissez « Jamais traitées » ou « Toutes ».":"Aucune question.";return}qs.list=pool;qs.pos=0;qs.score=0;qs.ans=null;vQcm(param)};
     return;
@@ -114,7 +150,7 @@ function vQcm(param){
   }
   const q=qs.list[qs.pos]; if(!qs.order)qs.order=shuffle([0,1,2,3,4]);
   const a=qs.ans;
-  app.innerHTML=`<div class="row" style="justify-content:space-between"><span class="tag">${esc(chName(q.c))}</span><span class="mono small muted">${qs.pos+1} / ${qs.list.length} · ${qs.score} juste${qs.score>1?"s":""}</span></div>
+  app.innerHTML=`<div class="row" style="justify-content:space-between">${tagCh(q.c)}<span class="row" style="gap:8px"><span class="mono small muted">${qs.pos+1} / ${qs.list.length} · ${qs.score} juste${qs.score>1?"s":""}</span>${starBtn("q:"+q.id,"question")}</span></div>
   <div class="bar" style="margin:10px 0 14px"><i style="width:${qs.pos/qs.list.length*100}%"></i></div>
   <div class="q-text">${esc(q.q)}</div><div class="small muted">Une ou plusieurs réponses exactes.</div>
   <div class="opts">${qs.order.map((oi,p)=>{const o=q.o[oi],chk=a&&a.includes(oi);let cls="";if(a){if(chk&&o[1])cls="good";else if(chk)cls="bad";else if(o[1])cls="miss"}
@@ -140,7 +176,7 @@ function vFiches(param){
   app.innerHTML=`<h1>Fiches mémoire</h1><p class="lead">Une fiche sue monte d'une boîte ; une fiche manquée retourne en boîte 1. Les boîtes basses reviennent plus souvent.</p>${concNote()}
   <div class="row" style="margin-bottom:10px">${chapterSelect("fc",fs_.c)}</div>
   <div class="boxes">${counts.map((c,k)=>`<div><b>${c}</b>Boîte ${k+1}</div>`).join("")}</div>
-  <div class="panel stack" style="margin-top:12px;min-height:220px"><div class="row" style="justify-content:space-between"><span class="tag">${esc(chName(f.c))}</span><span class="mono small muted">Boîte ${box[f.id]||1}</span></div>
+  <div class="panel stack" style="margin-top:12px;min-height:220px"><div class="row" style="justify-content:space-between">${tagCh(f.c)}<span class="row" style="gap:8px"><span class="mono small muted">Boîte ${box[f.id]||1}</span>${starBtn("f:"+f.id,"fiche")}</span></div>
   <div class="q-text">${esc(f.q)}</div>
   ${fs_.shown?`<div class="expl"><p>${esc(f.a)}</p><div class="ref">${esc(f.r)}</div></div><div class="row"><button class="btn ok" id="fy">Je savais</button><button class="btn ko" id="fn">À revoir</button></div>`:`<div class="row"><button class="btn primary" id="fs">Voir la réponse</button></div>`}</div>`;
   $("#fc").onchange=e=>{location.hash="fiches"+(e.target.value?"/"+e.target.value:"")};
@@ -154,7 +190,7 @@ function vJuris(param){
   const list=D.juris.filter(j=>inSel(j.c,param));
   app.innerHTML=`<h1>Jurisprudence</h1><p class="lead">Les arrêts à connaître pour ce volet. En mode entraînement, la solution est masquée : retrouvez la avant de l'afficher.</p>${concNote()}
   <div class="row" style="margin-bottom:12px">${chapterSelect("jc",param||"")}<label class="row small"><input type="checkbox" id="jh" ${jHide?"checked":""}> Mode entraînement</label></div>
-  <div class="stack">${list.map((j,i)=>`<div class="panel"><div class="row" style="justify-content:space-between"><span class="tag">${esc(chName(j.c))}</span></div>
+  <div class="stack">${list.map((j,i)=>`<div class="panel"><div class="row" style="justify-content:space-between">${tagCh(j.c)}${starBtn("j:"+j.nom,j.nom)}</div>
   <h2 style="margin-top:8px">${esc(j.nom)}</h2><div class="ref">${esc(j.ref)}</div>
   ${jHide?`<details style="margin-top:10px"><summary>Afficher la solution</summary><p style="margin-top:8px">${esc(j.sol)}</p><p class="small muted">${esc(j.portee)}</p></details>`:`<p style="margin-top:10px">${esc(j.sol)}</p><p class="small muted">${esc(j.portee)}</p>`}</div>`).join("")}</div>`;
   $("#jc").onchange=e=>{location.hash="juris"+(e.target.value?"/"+e.target.value:"")};
@@ -232,7 +268,7 @@ function vQualif(){
 /* ---------- Cas pratiques ---------- */
 function vCas(param){
   if(param!==undefined&&D.cas[+param]){const c=D.cas[+param],notes=store.get("cas",{});ttl.textContent=c.titre;
-    app.innerHTML=`<span class="tag">${esc(chName(c.c))}</span><h1 style="margin-top:8px">${esc(c.titre)}</h1><div class="panel"><p>${esc(c.enonce)}</p></div>
+    app.innerHTML=`${tagCh(c.c)}<h1 style="margin-top:8px">${esc(c.titre)}</h1><div class="panel"><p>${esc(c.enonce)}</p></div>
     <div class="stack" style="margin-top:14px">${c.questions.map((q,i)=>`<div class="panel"><h3 style="margin-top:0">Question ${i+1}</h3><p>${esc(q.q)}</p>
     <label class="small muted" for="n${i}">Votre réponse (enregistrée sur cet appareil)</label><textarea id="n${i}" data-k="${param}-${i}">${esc(notes[param+"-"+i]||"")}</textarea>
     <details style="margin-top:10px"><summary>Afficher le corrigé</summary><div class="corr">${esc(q.corr)}</div></details></div>`).join("")}</div>
@@ -316,6 +352,64 @@ function vBord(){
 const fmtD=d=>d.getDate()+" "+["janv.","févr.","mars","avr.","mai","juin","juil.","août","sept.","oct.","nov.","déc."][d.getMonth()];
 
 function resetViews(){qs=null;fs_={cur:null,shown:false,c:null};qq=null;ex=null}
+/* ---------- Recherche ---------- */
+let sq="";
+function searchIndex(){
+  if(searchIndex.c)return searchIndex.c;const I=[];
+  CH.forEach(c=>c.sections.forEach(s=>I.push({k:"Cours",c:c.id,t:c.titre+" · "+s.h,x:s.p.join(" "),h:"#cours/"+c.id})));
+  ALL.fiches.forEach(f=>I.push({k:"Fiche",c:f.c,t:f.q,x:f.a+" "+f.r,fid:f.id,body:`<p>${esc(f.a)}</p><div class="ref">${esc(f.r)}</div>`}));
+  ALL.qcm.forEach(q=>I.push({k:"QCM",c:q.c,t:q.q,x:q.o.map(o=>o[0]).join(" ")+" "+q.e,qid:q.id,body:`<p class="small"><b>Réponses exactes :</b> ${q.o.filter(o=>o[1]).map(o=>esc(o[0])).join(" ; ")}</p><p class="small">${esc(q.e)}</p><div class="ref">${q.r.map(esc).join(" · ")}</div>`}));
+  ALL.juris.forEach(j=>I.push({k:"Arrêt",c:j.c,t:j.nom+" · "+j.ref,x:j.sol+" "+j.portee,jn:j.nom,body:`<p>${esc(j.sol)}</p><p class="small muted">${esc(j.portee)}</p>`}));
+  (window.SUJETS||[]).forEach(s=>I.push({k:"Sujet "+CONC[s.conc].t,c:null,t:s.titre,x:s.enonce+" "+s.questions.map(q=>q.q+" "+q.corr.join(" ")).join(" "),h:"#sujets/"+s.id}));
+  ALL.delais.forEach(d=>I.push({k:"Délai",c:delaiCh(d),t:d.a,x:d.d+" "+d.dep+" "+d.s+" "+d.t,body:`<p class="small"><b>${esc(d.d)}</b> · départ : ${esc(d.dep)}${d.s?" · sanction : "+esc(d.s):""}</p><div class="ref">${esc(d.t)}</div>`}));
+  I.forEach(e=>{e.n=norm(e.t+" "+e.x)});return searchIndex.c=I;
+}
+function snippet(txt,terms){const n=norm(txt);let p=-1;for(const w of terms){p=n.indexOf(w);if(p>=0)break}const a=Math.max(0,p-70),s=(a?"…":"")+txt.slice(a,a+220)+(txt.length>a+220?"…":"");return hl(s,terms)}
+function hl(s,terms){let out=esc(s);terms.forEach(w=>{if(w.length<2)return;const src=norm(out);let res="",i=0,k;const W=w;while((k=src.indexOf(W,i))>=0){res+=out.slice(i,k)+"<mark>"+out.slice(k,k+W.length)+"</mark>";i=k+W.length}out=res+out.slice(i)});return out}
+function vRecherche(){
+  app.innerHTML=`<h1>Recherche</h1><p class="lead">Un mot, une notion ou un numéro d'article : la recherche porte sur les cours, les fiches, les QCM, les arrêts, les délais et les sujets, sans tenir compte des accents.</p>${concNote()}
+  <div class="searchbox">${ICO.recherche}<input type="search" id="sq" placeholder="Exemple : péremption, 528-1, astreinte" value="${esc(sq)}" aria-label="Rechercher" autocomplete="off"></div>
+  <div id="sres" style="margin-top:16px"></div>`;
+  const run=()=>{sq=$("#sq").value;const terms=norm(sq).split(/\s+/).filter(w=>w.length>1);const box=$("#sres");
+    if(!terms.length){box.innerHTML=`<p class="muted small">Suggestions : ${["exécution provisoire","péremption","1448","médiation","astreinte","récusation","750-1"].map(w=>`<button class="chip" data-s="${esc(w)}">${esc(w)}</button>`).join(" ")}</p>`;box.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{$("#sq").value=b.dataset.s;run()});return}
+    const R=searchIndex().filter(e=>(!e.c||inConc(e.c))&&terms.every(w=>e.n.includes(w))).map(e=>({e,s:terms.reduce((a,w)=>a+(norm(e.t).includes(w)?3:0),0)})).sort((a,b)=>b.s-a.s).slice(0,80);
+    box.innerHTML=R.length?`<p class="small muted">${R.length}${R.length===80?" premiers":""} résultat${R.length>1?"s":""}</p><div class="stack">${R.map(({e})=>{const head=`<div class="row" style="justify-content:space-between;gap:8px"><span class="row" style="gap:6px"><span class="tag" style="--vc:${e.c?vcOf(e.c):"var(--accent)"}">${esc(e.k)}</span>${e.c?`<span class="small muted">${esc(chName(e.c))}</span>`:""}</span>${e.qid?starBtn("q:"+e.qid,"question"):e.fid?starBtn("f:"+e.fid,"fiche"):e.jn?starBtn("j:"+e.jn,e.jn):""}</div><div style="font-weight:700;margin-top:6px">${hl(e.t,terms)}</div>`;
+      return e.h?`<a class="panel hit" href="${e.h}">${head}<p class="snip">${snippet(e.x,terms)}</p></a>`:`<div class="panel">${head}<p class="snip small muted" style="margin:4px 0 0">${snippet(e.x,terms)}</p><details style="margin-top:8px"><summary>Afficher</summary><div style="margin-top:8px">${e.body}</div></details></div>`}).join("")}</div>`:`<div class="panel"><p class="muted" style="margin:0">Aucun résultat pour « ${esc(sq)} ». Essayez un terme plus court ou un numéro d'article seul.</p></div>`};
+  $("#sq").addEventListener("input",run);run();setTimeout(()=>{try{$("#sq").focus()}catch(e){}},50);
+}
+
+/* ---------- Favoris ---------- */
+function vFavoris(){
+  const F=favs(),ks=Object.keys(F).sort((a,b)=>F[b]-F[a]);
+  const item=k=>{const [ty,...r]=k.split(":"),id=r.join(":");
+    if(ty==="q"){const q=ALL.qcm.find(x=>x.id===id);return q&&{g:"QCM",c:q.c,html:`<div class="q-text" style="font-size:1.02rem">${esc(q.q)}</div><details style="margin-top:8px"><summary>Voir la correction</summary><p class="small" style="margin-top:8px"><b>Réponses exactes :</b> ${q.o.filter(o=>o[1]).map(o=>esc(o[0])).join(" ; ")}</p><p class="small">${esc(q.e)}</p><div class="ref">${q.r.map(esc).join(" · ")}</div></details>`}}
+    if(ty==="f"){const f=ALL.fiches.find(x=>x.id===id);return f&&{g:"Fiches",c:f.c,html:`<div style="font-weight:700">${esc(f.q)}</div><details style="margin-top:8px"><summary>Voir la réponse</summary><p style="margin-top:8px">${esc(f.a)}</p><div class="ref">${esc(f.r)}</div></details>`}}
+    if(ty==="j"){const j=ALL.juris.find(x=>x.nom===id);return j&&{g:"Arrêts",c:j.c,html:`<div style="font-weight:700">${esc(j.nom)}</div><div class="ref">${esc(j.ref)}</div><p style="margin:8px 0 0">${esc(j.sol)}</p>`}}
+    if(ty==="c"){const c=CH.find(x=>x.id===id);return c&&{g:"Chapitres",c:c.id,html:`<a href="#cours/${c.id}" style="font-weight:700;text-decoration:none">${esc(c.titre)}</a>`}}
+    if(ty==="s"){const s=(window.SUJETS||[]).find(x=>x.id===id);return s&&{g:"Sujets",c:null,html:`<a href="#sujets/${s.id}" style="font-weight:700;text-decoration:none">${esc(s.titre)}</a><div class="small muted">${esc(CONC[s.conc].t)} · ${esc(s.type)}</div>`}}
+    return null};
+  const items=ks.map(k=>[k,item(k)]).filter(x=>x[1]);
+  const groups=["Chapitres","QCM","Fiches","Arrêts","Sujets"];
+  const nq=items.filter(x=>x[1].g==="QCM").length;
+  app.innerHTML=`<h1>Favoris</h1><p class="lead">Les éléments marqués de l'étoile, pour une dernière révision avant l'épreuve. Ajoutez un favori depuis un QCM, une fiche, un arrêt, un chapitre ou un sujet.</p>
+  ${nq?`<div class="row" style="margin-bottom:6px"><a class="btn primary" href="#qcm">Réviser mes ${nq} QCM favoris</a><span class="small muted">Choisissez « Mes favoris » dans le module QCM.</span></div>`:""}
+  ${items.length?groups.filter(g=>items.some(x=>x[1].g===g)).map(g=>`<h3>${g}</h3><div class="stack">${items.filter(x=>x[1].g===g).map(([k,x])=>`<div class="panel"><div class="row" style="justify-content:space-between;margin-bottom:8px">${x.c?tagCh(x.c):`<span class="tag">Sujet</span>`}${starBtn(k,"")}</div>${x.html}</div>`).join("")}</div>`).join(""):`<div class="panel" style="text-align:center;padding:28px 18px"><div style="width:44px;height:44px;margin:0 auto 10px;color:var(--gilt)">${ICO.favoris}</div><p style="margin:0 auto" class="muted">Aucun favori pour l'instant. Touchez l'étoile d'une question, d'une fiche ou d'un arrêt pour l'ajouter ici.</p></div>`}`;
+}
+
+/* ---------- Impression ---------- */
+function vImprimer(param){
+  const c=CH.find(x=>x.id===param);if(!c)return vCours();
+  ttl.textContent="Imprimer : "+c.titre;app.style.setProperty("--vc",vcOf(c.id));
+  const F=ALL.fiches.filter(f=>f.c===c.id),J=ALL.juris.filter(j=>j.c===c.id);
+  app.innerHTML=`<div class="panel noprint" style="margin-bottom:18px"><p style="margin:0 0 10px">Version imprimable du chapitre, avec ses fiches mémoire et ses arrêts. Pour un PDF, choisissez « Enregistrer au format PDF » comme imprimante.</p><div class="row"><button class="btn primary" id="pgo">${ICO.imprimer.replace('<svg','<svg width="18" height="18"')} Imprimer ou enregistrer en PDF</button><a class="btn" href="#cours/${c.id}">Retour au chapitre</a></div><p class="small muted" id="pmsg" style="margin:8px 0 0"></p></div>
+  <div class="eyebrow" style="color:var(--vc)">${esc((VO.find(v=>v.id===c.v)||{}).titre||"")} · Atelier procédure civile</div><h1>${esc(c.titre)}</h1>
+  ${c.sections.map(s=>`<div class="sec"><h3>${esc(s.h)}</h3>${s.p.map(p=>`<p>${esc(p)}</p>`).join("")}</div>`).join("")}
+  ${F.length?`<h2 style="margin-top:26px">Fiches mémoire</h2><div class="stack">${F.map(f=>`<div class="panel"><div style="font-weight:700">${esc(f.q)}</div><p style="margin:6px 0 4px">${esc(f.a)}</p><div class="ref">${esc(f.r)}</div></div>`).join("")}</div>`:""}
+  ${J.length?`<h2 style="margin-top:26px">Arrêts</h2><div class="stack">${J.map(j=>`<div class="panel"><div style="font-weight:700">${esc(j.nom)}</div><div class="ref">${esc(j.ref)}</div><p style="margin:6px 0 4px">${esc(j.sol)}</p><p class="small muted" style="margin:0">${esc(j.portee)}</p></div>`).join("")}</div>`:""}
+  <p class="note">Textes à jour au 27 octobre 2026. Support d'entraînement : vérifiez toujours les textes en vigueur.</p>`;
+  $("#pgo").onclick=()=>{try{window.print()}catch(e){}$("#pmsg").textContent="Si la fenêtre d'impression ne s'ouvre pas, utilisez la commande Imprimer de votre navigateur (Ctrl+P ou menu Partager sur téléphone)."};
+}
+
 /* ---------- Sujets d'examen ---------- */
 const sujNote=s=>{const st=store.get("suj",{})[s.id]||{},ck=st.chk||{};let tot=0,got=0,any=false;s.questions.forEach((q,i)=>q.grille.forEach((g,j)=>{tot+=g[1];if(ck[i+"-"+j]){got+=g[1];any=true}}));return {n:tot?got/tot*20:0,any,done:!!st.done}};
 const fmtN=x=>x.toFixed(1).replace(".",",");
@@ -323,7 +417,7 @@ function vSujets(param){
   const S=window.SUJETS||[];
   if(param){const s=S.find(x=>x.id===param);if(!s)return vSujets();const st=store.get("suj",{})[s.id]||{};ttl.textContent=s.titre;
     const save=fn=>{const a=store.get("suj",{});a[s.id]=a[s.id]||{};fn(a[s.id]);store.set("suj",a)};
-    app.innerHTML=`<span class="tag">${esc(CONC[s.conc].t)} · ${esc(s.type)}${s.duree?" · "+esc(s.duree):""}</span><h1 style="margin-top:8px">${esc(s.titre)}</h1>
+    app.innerHTML=`<span class="tag">${esc(CONC[s.conc].t)} · ${esc(s.type)}${s.duree?" · "+esc(s.duree):""}</span><div class="row" style="justify-content:space-between;align-items:flex-start;gap:12px;margin-top:8px"><h1 style="margin:0;min-width:0">${esc(s.titre)}</h1>${starBtn("s:"+s.id,s.titre)}</div>
     <div class="panel"><p>${esc(s.enonce)}</p></div>
     <p class="small muted" style="margin-top:10px">Méthode : rédigez votre réponse avant d'ouvrir le corrigé, puis cochez dans la grille les éléments que vous aviez traités. La note obtenue est une autoévaluation indicative ; les jurys ne publient pas de barème officiel.</p>
     <div class="stack" style="margin-top:12px">${s.questions.map((q,i)=>`<div class="panel"><h3 style="margin-top:0">${s.questions.length>1?"Question "+(i+1):"Sujet"}</h3><p>${esc(q.q)}</p>
@@ -421,12 +515,14 @@ function vDissert(param){
 }
 
 /* ---------- Routeur ---------- */
-const VIEWS={sujets:vSujets,examen:vExam,bord:vBord,cours:vCours,qcm:vQcm,fiches:vFiches,juris:vJuris,delais:vDelais,calcul:vCalcul,qualif:vQualif,cas:vCas,doctrine:vDoctrine,dissert:vDissert};
+const VIEWS={recherche:vRecherche,favoris:vFavoris,imprimer:vImprimer,sujets:vSujets,examen:vExam,bord:vBord,cours:vCours,qcm:vQcm,fiches:vFiches,juris:vJuris,delais:vDelais,calcul:vCalcul,qualif:vQualif,cas:vCas,doctrine:vDoctrine,dissert:vDissert};
 function route(){
   const [v,p]=location.hash.slice(1).split("/");
-  const m=MODULES.find(x=>x.id===v);
+  const m=MODULES.find(x=>x.id===v)||(v==="imprimer"?{t:"Imprimer"}:null);
   back.hidden=!m; ttl.textContent=m?m.t:"Atelier procédure civile";
-  back.href=(p&&["cours","cas","doctrine","dissert","sujets"].includes(v))?"#"+v:"#";
+  back.href=(p&&["cours","cas","doctrine","dissert","sujets"].includes(v))?"#"+v:(v==="imprimer"&&p?"#cours/"+p:"#");
+  document.querySelectorAll(".top .act a").forEach(a=>a.classList.toggle("on",a.getAttribute("href")==="#"+v));
+  if(!["cours","imprimer"].includes(v))app.style.removeProperty("--vc");
   (VIEWS[v]||vHome)(p);
   if(!p||v!=="qcm")window.scrollTo(0,0);
 }
