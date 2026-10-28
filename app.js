@@ -26,7 +26,7 @@ const ICO={
  favoris:SV('<path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.2l1.1-6.2L3 9.6l6.2-.9z"/>'),
  imprimer:SV('<path d="M6 9V2h12v7"/><rect x="2" y="9" width="20" height="9" rx="2"/><path d="M6 14h12v8H6z"/>')
 };
-const VCOL={pc:"var(--v-pc)",mard:"var(--v-mard)",arb:"var(--v-arb)",pce:"var(--v-pce)"};
+const VCOL={lib:"var(--v-lib)",pc:"var(--v-pc)",mard:"var(--v-mard)",arb:"var(--v-arb)",pce:"var(--v-pce)"};
 const vcOf=c=>VCOL[(CH.find(x=>x.id===c)||{}).v]||"var(--accent)";
 const tagCh=c=>`<span class="tag" style="--vc:${vcOf(c)}">${esc(chName(c))}</span>`;
 const favs=()=>store.get("fav",{});
@@ -42,6 +42,7 @@ const PCH=["pd","act","comp","juge","intro","del","def","inst","pre","jug","urg"
 const CONC={
  crfpa:{t:"CRFPA",ch:null,ref:"Arrêté du 17 octobre 2016 modifié",ep:"Épreuve écrite d'admissibilité de procédure (2 heures, coefficient 2), sous la forme d'une ou plusieurs consultations. La procédure civile est l'épreuve de procédure des candidats ayant choisi la spécialité droit civil, droit des affaires ou droit social ; en droit international et européen et en droit fiscal, le candidat choisit entre procédure civile et procédure administrative. Programme : procédure civile, modes amiables de résolution des différends, arbitrage, procédures civiles d'exécution. Tout le contenu de l'application est concerné."},
  enm:{t:"ENM",ch:PCH.filter(c=>c!=="frais").concat(["m1","m2","m3","m5"]),ref:"Arrêté du 31 décembre 2008 modifié",ep:"Épreuve écrite d'admissibilité de droit civil et procédure civile : composition ou cas pratique au choix du jury (premier concours), cas pratique (deuxième concours), cas pratique ou questions à réponse courte au choix du candidat (troisième concours). Le programme vise l'action en justice, les actes de procédure, les délais, les principes directeurs et l'influence du droit européen, la preuve, les procédures contentieuse et gracieuse, les effets du jugement, les voies de recours et les modes amiables (médiation et conciliation). L'arbitrage, les procédures civiles d'exécution, les procédures participatives et les frais du procès en sont exclus."},
+ go:{t:"Grand oral CRFPA",ch:["l1","l2","l3","l4","l5","l6","l7","l8"],ref:"Arrêté du 17 octobre 2016 modifié, art. 7",ep:"Épreuve d'admission : exposé de quinze minutes, après une préparation d'une heure, sur un sujet relatif à la protection des libertés et des droits fondamentaux, suivi d'un entretien de trente minutes avec le jury ; séance publique ; coefficient 4. Le programme couvre la culture juridique générale, l'origine et les sources, le régime juridique et les principales libertés. Le filtre n'affiche que le volet Grand oral."},
  greffier:{t:"Greffier (procédure civile)",ch:PCH.concat(["m2","e1"]),ref:"Arrêté du 29 avril 2016 modifié",ep:"Épreuve écrite d'admissibilité n° 2 (3 heures, coefficient 4) : organisation judiciaire et administrative, puis, au choix, procédure civile et prud'homale ou procédure pénale. L'application couvre la partie procédure civile, y compris la conciliation et l'exécution des jugements ; elle ne traite ni la procédure prud'homale, ni l'organisation de la cour d'assises, des juridictions des mineurs et de l'ordre administratif, ni les auxiliaires de justice."}
 };
 const conc=()=>{const k=store.get("conc","");return CONC[k]?k:""};
@@ -90,7 +91,7 @@ function vHome(){
   const due=D.qcm.filter(q=>qDue(qs[q.id])).length;
   const GR=[["a","Apprendre"],["e","S'entraîner"],["o","Suivre et chercher"]];
   const VID={pc:"cours",mard:"cours",arb:"cours",pce:"cours"};
-  app.innerHTML=`<section class="cover"><div class="eyebrow">CRFPA · ENM · Greffier (procédure civile)</div><h1>Atelier procédure civile</h1>
+  app.innerHTML=`<section class="cover"><div class="eyebrow">${conc()==="go"?"CRFPA · Grand oral · Libertés et droits fondamentaux":"CRFPA · Grand oral · ENM · Greffier (procédure civile)"}</div><h1>Atelier procédure civile</h1>
   <p class="lead">Cours, entraînement et outils pour réviser la procédure civile. Votre progression reste enregistrée sur cet appareil.</p>
   <div class="maj">Textes à jour au 27 octobre 2026</div>
   <div class="row" style="margin-top:16px">${[["","Tous"]].concat(Object.keys(CONC).map(k=>[k,CONC[k].t])).map(([k,n])=>`<button class="chip ${conc()===k?"on":""}" data-conc="${k}">${esc(n)}</button>`).join("")}</div>
@@ -411,6 +412,7 @@ function vImprimer(param){
 }
 
 /* ---------- Sujets d'examen ---------- */
+let goT=null;
 const sujNote=s=>{const st=store.get("suj",{})[s.id]||{},ck=st.chk||{};let tot=0,got=0,any=false;s.questions.forEach((q,i)=>q.grille.forEach((g,j)=>{tot+=g[1];if(ck[i+"-"+j]){got+=g[1];any=true}}));return {n:tot?got/tot*20:0,any,done:!!st.done}};
 const fmtN=x=>x.toFixed(1).replace(".",",");
 function vSujets(param){
@@ -418,7 +420,8 @@ function vSujets(param){
   if(param){const s=S.find(x=>x.id===param);if(!s)return vSujets();const st=store.get("suj",{})[s.id]||{};ttl.textContent=s.titre;
     const save=fn=>{const a=store.get("suj",{});a[s.id]=a[s.id]||{};fn(a[s.id]);store.set("suj",a)};
     app.innerHTML=`<span class="tag">${esc(CONC[s.conc].t)} · ${esc(s.type)}${s.duree?" · "+esc(s.duree):""}</span><div class="row" style="justify-content:space-between;align-items:flex-start;gap:12px;margin-top:8px"><h1 style="margin:0;min-width:0">${esc(s.titre)}</h1>${starBtn("s:"+s.id,s.titre)}</div>
-    <div class="panel"><p>${esc(s.enonce)}</p></div>
+    <div class="panel"><p style="margin:0">${esc(s.enonce)}</p></div>
+    ${s.conc==="go"?`<div class="panel" style="margin-top:12px"><div class="row" style="justify-content:space-between"><b>Mode épreuve</b><span class="big mono" id="gclk">60:00</span></div><p class="small muted" id="gph" style="margin:6px 0 10px">Lancez la préparation d'une heure, puis l'exposé de quinze minutes.</p><div class="bar"><i id="gbar" style="width:0%"></i></div><div class="row" style="margin-top:10px"><button class="btn primary" id="gprep">Préparation : 1 h</button><button class="btn" id="gexp">Exposé : 15 min</button><button class="btn" id="gstop">Arrêter</button></div></div>`:""}
     <p class="small muted" style="margin-top:10px">Méthode : rédigez votre réponse avant d'ouvrir le corrigé, puis cochez dans la grille les éléments que vous aviez traités. La note obtenue est une autoévaluation indicative ; les jurys ne publient pas de barème officiel.</p>
     <div class="stack" style="margin-top:12px">${s.questions.map((q,i)=>`<div class="panel"><h3 style="margin-top:0">${s.questions.length>1?"Question "+(i+1):"Sujet"}</h3><p>${esc(q.q)}</p>
      <label class="small muted" for="sn${i}">Votre réponse (enregistrée sur cet appareil)</label><textarea id="sn${i}" data-i="${i}" style="min-height:140px">${esc((st.notes||{})[i]||"")}</textarea>
@@ -429,11 +432,15 @@ function vSujets(param){
     app.querySelectorAll("textarea[data-i]").forEach(x=>x.addEventListener("input",()=>save(o=>{o.notes=o.notes||{};o.notes[x.dataset.i]=x.value})));
     app.querySelectorAll("details[data-d]").forEach(d=>d.addEventListener("toggle",()=>save(o=>{o.open=o.open||{};o.open[d.dataset.d]=d.open})));
     app.querySelectorAll("input[data-k]").forEach(x=>x.onchange=()=>{save(o=>{o.chk=o.chk||{};o.chk[x.dataset.k]=x.checked});const n=sujNote(s);$("#snote").textContent=fmtN(n.n)+" / 20";app.querySelector(".panel .bar i").style.width=Math.round(n.n*5)+"%"});
+    if(s.conc==="go"){const PH=[[0,"Introduction : accroche, définitions, problématique, annonce du plan (environ 3 minutes)."],[180,"Première partie (environ 5 minutes)."],[480,"Seconde partie (environ 5 minutes)."],[780,"Conclusion et ouverture : il reste 2 minutes."],[900,"Temps écoulé : concluez maintenant."]];
+      const run=(sec,mode)=>{if(goT)clearInterval(goT);const t0=Date.now();const tick=()=>{if(!location.hash.startsWith("#sujets/"+s.id)){clearInterval(goT);goT=null;return}const el=Math.floor((Date.now()-t0)/1000),left=Math.max(0,sec-el);const c=$("#gclk");if(!c)return;c.textContent=String(Math.floor(left/60)).padStart(2,"0")+":"+String(left%60).padStart(2,"0");$("#gbar").style.width=Math.min(100,el/sec*100)+"%";
+        $("#gph").textContent=mode==="exp"?PH.filter(p=>el>=p[0]).pop()[1]:(left>0?(el<600?"Analyse du sujet : termes, enjeux, actualité.":el<2400?"Recherche des idées et construction du plan en deux parties.":"Rédaction de l'introduction et de la conclusion ; le corps reste en notes."):"Préparation terminée : passez à l'exposé.");if(left<=0&&mode==="prep"){clearInterval(goT);goT=null}};tick();goT=setInterval(tick,1000)};
+      $("#gprep").onclick=()=>run(3600,"prep");$("#gexp").onclick=()=>run(900,"exp");$("#gstop").onclick=()=>{if(goT)clearInterval(goT);goT=null;$("#gph").textContent="Minuteur arrêté."}}
     $("#sdone").onclick=()=>{save(o=>{o.done=!o.done;o.t=Date.now()});logAct();vSujets(param)};
     $("#sreset").onclick=e=>{const b=e.target;if(!b.dataset.c){b.dataset.c=1;b.textContent="Confirmer l'effacement";return}const a=store.get("suj",{});delete a[s.id];store.set("suj",a);vSujets(param)};
     return;}
   const ks=conc()?[conc()]:Object.keys(CONC);
-  app.innerHTML=`<h1>Sujets d'examen</h1><p class="lead">Sujets originaux reproduisant la forme des épreuves : consultation de 2 heures pour le CRFPA, cas pratique ou composition pour l'ENM, questions à réponse courte pour le concours de greffier. Chaque sujet comporte un corrigé détaillé et une grille d'autoévaluation.</p>${concNote()}
+  app.innerHTML=`<h1>Sujets d'examen</h1><p class="lead">Sujets originaux reproduisant la forme des épreuves : consultation de 2 heures pour le CRFPA, cas pratique ou composition pour l'ENM, questions à réponse courte pour le concours de greffier, exposé de quinze minutes pour le grand oral. Chaque sujet comporte un corrigé détaillé et une grille d'autoévaluation.</p>${concNote()}
   ${ks.map(k=>`<h3>${esc(CONC[k].t)}</h3><div class="stack">${S.filter(s=>s.conc===k).map(s=>{const n=sujNote(s);return `<a class="tile" href="#sujets/${s.id}"><span class="n">${esc(s.type)} · ${s.questions.length>1?s.questions.length+" questions":"1 sujet"}${n.done?" · traité":""}${n.any?" · "+fmtN(n.n)+" / 20":""}</span><b>${esc(s.titre)}</b><span>${esc(s.enonce.slice(0,130))}${s.enonce.length>130?"…":""}</span></a>`}).join("")}</div>`).join("")}`;
 }
 
