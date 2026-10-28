@@ -9,6 +9,7 @@ const shuffle=a=>{a=a.slice();for(let k=a.length-1;k>0;k--){const j=Math.floor(M
 const L="ABCDE";
 const SV=p=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
 const ICO={
+ entretien:SV('<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 9h8M8 13h5"/>'),
  bord:SV('<path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/>'),
  cours:SV('<path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 21.5V4.5"/><path d="M8 7h8M8 11h6"/>'),
  examen:SV('<circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2"/><path d="M9 2h6"/>'),
@@ -71,6 +72,7 @@ const MODULES=[
  {id:"delais",g:"e",t:"Tableau des délais",d:"Durées à compléter, départ et sanction",n:()=>D.delais.length+" délais"},
  {id:"calcul",g:"o",t:"Calculateur de délais",d:"Articles 640 à 643, jours fériés inclus",n:()=>"Outil"},
  {id:"qualif",g:"e",t:"Qualifications",d:"Exception, fin de non recevoir, défense au fond",n:()=>D.qualif.length+" moyens"},
+ {id:"entretien",g:"e",t:"Entretien greffier",d:"Oral d'admission chronométré : présentation et questions du jury",n:()=>ALL.entretien.questions.length+" questions"},
  {id:"sujets",g:"e",t:"Sujets d'examen",d:"Sujets au format de chaque concours, corrigés détaillés et grille de notation",n:()=>(window.SUJETS||[]).filter(s=>!conc()||s.conc===conc()).length+" sujets"},
  {id:"cas",g:"e",t:"Cas pratiques",d:"Énoncés type examen et corrigés rédigés",n:()=>D.cas.length+" cas"},
  {id:"doctrine",g:"a",t:"Débats doctrinaux",d:"Thèses récentes, controverses et critiques",n:()=>window.DOCTRINE.length+" débats"},
@@ -292,6 +294,70 @@ function exportDoc(name,titre,meta,enonce,qs){
   const body=`<h1>${esc(titre)}</h1>${meta?`<p class="meta">${esc(meta)}</p>`:""}<h2>Énoncé</h2>${P(enonce)}`+qs.map((q,i)=>`<h2>${qs.length>1?"Question "+(i+1):"Sujet"}</h2><p><b>${esc(q.q)}</b></p><h3>Corrigé</h3>${paras(q.corr).map(P).join("")}${q.grille?`<h3>Éléments attendus</h3><ul>${q.grille.map(g=>`<li>${esc(g[0])} (${fmtN(g[1])} pt)</li>`).join("")}</ul>`:""}`).join("")+`<p class="meta">Atelier de procédure. Corrigé d'entraînement établi d'après les textes en vigueur au 28 octobre 2026 ; vérifiez toujours les textes applicables.</p>`;
   const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>${esc(titre)}</title><style>@page{size:21cm 29.7cm;margin:2.5cm}body,p,li,h1,h2,h3{font-family:"Times New Roman",serif;font-size:12pt}body{line-height:1.15}h1{font-weight:bold;text-align:center;margin:0 0 12pt}h2{font-weight:bold;margin:14pt 0 6pt}h3{font-weight:bold;font-style:italic;margin:10pt 0 4pt}p{text-align:justify;margin:0 0 6pt}.meta{font-style:italic}</style></head><body>${body}</body></html>`;
   const blob=new Blob(["﻿"+html],{type:"application/msword"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name.replace(/[^\wÀ-ÿ-]+/g,"-").replace(/-+/g,"-").toLowerCase()+".doc";document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500);toast("Corrigé exporté au format Word");
+}
+
+/* ---------- Simulateur d'entretien greffier ---------- */
+let entT=null,ent=null;
+const fmtMS=s=>{s=Math.max(0,Math.round(s));return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")};
+function entDraw(n){const E=ALL.entretien,by={};E.questions.forEach((q,i)=>{(by[q.cat]=by[q.cat]||[]).push(i)});
+  const sh=a=>a.map(x=>[Math.random(),x]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
+  const plan=n<=6?{parcours:1,metier:1,institution:1,deonto:1,culture:1,situation:1}:n<=8?{parcours:1,metier:2,institution:1,deonto:1,culture:1,situation:2}:{parcours:2,metier:2,institution:2,deonto:1,culture:1,situation:2};
+  let out=[];Object.keys(plan).forEach(c=>out=out.concat(sh(by[c]||[]).slice(0,plan[c])));return out}
+function vEntretien(param){
+  const E=ALL.entretien,C=E.cats;if(entT){clearInterval(entT);entT=null}
+  const rev=store.get("entrev",{});
+  if(param==="banque"){ttl.textContent="Banque de questions";
+    app.innerHTML=`<h1>Banque de questions</h1><p class="lead">${E.questions.length} questions classées par thème, avec des éléments de réponse à adapter à votre parcours.</p>
+    ${Object.keys(C).map(c=>`<h2 style="margin-top:22px">${esc(C[c])}</h2><div class="stack">${E.questions.map((q,i)=>q.cat!==c?"":`<div class="panel"><b>${esc(q.q)}</b>${rev[i]?` <span class="tag">À revoir</span>`:""}<details style="margin-top:8px"><summary>Éléments de réponse</summary><ul class="small">${q.p.map(x=>`<li>${esc(x)}</li>`).join("")}</ul><div class="ref">${esc(q.r)}</div></details></div>`).join("")}</div>`).join("")}`;return}
+  if(!ent||param!=="go"){
+    const hist=store.get("enthist",[]);
+    app.innerHTML=`<h1>Entretien greffier</h1><p class="lead">Simulation de l'épreuve orale d'admission du concours externe : présentation de cinq minutes, puis questions du jury, dans la limite de vingt cinq minutes.</p>
+    <div class="panel"><b>Modalités</b><ul class="small" style="margin:8px 0 0">
+    <li>Entretien de 25 minutes au plus, dont 5 minutes au plus de présentation du parcours et de la motivation, à partir de la fiche individuelle de renseignement ; coefficient 4 ; note inférieure à 5 éliminatoire.</li>
+    <li>Le jury évalue les qualités personnelles, le potentiel et le comportement face à une situation concrète, notamment par une mise en situation.</li>
+    <li>Grille utilisée par le jury en 2024 : présentation et qualité de l'échange ; connaissance de l'environnement professionnel et positionnement ; aptitude professionnelle et organisationnelle ; qualités relationnelles ; motivation et projet professionnel.</li></ul>
+    <p class="small muted" style="margin:8px 0 0">Sources : notice du concours de greffier, session 2027 ; rapport du jury du concours national à affectation locale d'Aix-en-Provence, 2024.</p></div>
+    <div class="panel" style="margin-top:12px"><b>Ce que le jury a relevé en 2024</b><ul class="small" style="margin:8px 0 0">
+    <li>Missions du greffier et déontologie : majoritairement bien traitées.</li>
+    <li>Environnement judiciaire (organisation d'une juridiction, partenaires, directions du ministère) : trop de candidats sans réponse.</li>
+    <li>Points faibles : sécurité informatique, absence de visite d'audience publique, projet professionnel imprécis, difficulté à se positionner dans l'équipe.</li></ul></div>
+    <div class="panel" style="margin-top:12px"><label class="small muted" for="entplan">Votre plan de présentation (enregistré sur cet appareil)</label><textarea id="entplan" style="min-height:110px" placeholder="Parcours, expériences utiles, motivation, projet">${esc(store.get("entplan",""))}</textarea></div>
+    <div class="row" style="margin-top:14px;align-items:center"><span class="small">Nombre de questions :</span>${[6,8,10].map(n=>`<button class="chip ${n===8?"on":""}" data-n="${n}">${n}</button>`).join("")}</div>
+    <div class="row" style="margin-top:12px"><button class="btn primary" id="entgo">Lancer l'entretien</button><a class="btn" href="#entretien/banque">Banque de questions</a>${Object.keys(rev).length?`<button class="btn" id="entrv">Revoir mes ${Object.keys(rev).length} questions à revoir</button>`:""}</div>
+    ${hist.length?`<p class="small muted" style="margin-top:14px">Dernières simulations : ${hist.slice(-5).reverse().map(h=>`${new Date(h.d).toLocaleDateString("fr-FR")} (${h.ok}/${h.n} à l'aise)`).join(" · ")}</p>`:""}`;
+    let n=8;app.querySelectorAll("[data-n]").forEach(b=>b.onclick=()=>{n=+b.dataset.n;app.querySelectorAll("[data-n]").forEach(x=>x.classList.toggle("on",x===b))});
+    $("#entplan").addEventListener("input",e=>store.set("entplan",e.target.value));
+    const start=list=>{ent={list,pos:-1,t0:Date.now(),res:{},show:false};location.hash="#entretien/go"};
+    $("#entgo").onclick=()=>start(entDraw(n));
+    if($("#entrv"))$("#entrv").onclick=()=>start(Object.keys(rev).map(Number));
+    return}
+  /* déroulement */
+  const L=ent.list,el=()=>(Date.now()-ent.t0)/1000;
+  const draw=()=>{const s=el();
+    if(ent.pos===-1){app.innerHTML=`<span class="tag">Présentation</span><div class="row" style="justify-content:space-between;align-items:center;margin-top:8px"><h1 style="margin:0">Présentez votre parcours</h1><span class="big mono" id="eclk">${fmtMS(300-s)}</span></div>
+      <div class="bar" style="margin-top:10px"><i id="ebar" style="width:${Math.min(100,s/3)}%"></i></div>
+      <div class="panel" style="margin-top:14px"><p style="margin:0">Exposez à voix haute, en cinq minutes au plus, votre parcours, vos expériences utiles et votre motivation. Vous ne disposez pas de votre fiche pendant l'épreuve.</p>${store.get("entplan","")?`<details style="margin-top:10px"><summary>Mon plan</summary><p class="small" style="white-space:pre-wrap">${esc(store.get("entplan",""))}</p></details>`:""}</div>
+      <div class="row" style="margin-top:14px"><button class="btn primary" id="enext">Terminer la présentation et passer aux questions</button><button class="btn" id="eabort">Abandonner</button></div>`}
+    else if(ent.pos<L.length){const i=L[ent.pos],q=E.questions[i];
+      app.innerHTML=`<div class="row" style="justify-content:space-between;align-items:center"><span class="tag">${esc(C[q.cat])} · question ${ent.pos+1} sur ${L.length}</span><span class="big mono" id="eclk">${fmtMS(1500-s)}</span></div>
+      <div class="bar" style="margin-top:10px"><i id="ebar" style="width:${Math.min(100,s/15)}%"></i></div>
+      <div class="panel" style="margin-top:14px"><p style="font-size:1.1rem;margin:0"><b>${esc(q.q)}</b></p>
+      <p class="small muted" style="margin:8px 0 0">Répondez à voix haute, comme devant le jury, avant d'afficher les éléments de réponse.</p>
+      <details style="margin-top:10px" ${ent.show?"open":""} id="edet"><summary>Éléments de réponse</summary><ul class="small">${q.p.map(x=>`<li>${esc(x)}</li>`).join("")}</ul><div class="ref">${esc(q.r)}</div></details></div>
+      <div class="row" style="margin-top:14px"><button class="btn primary" data-r="1">J'étais à l'aise</button><button class="btn" data-r="0">À revoir</button><button class="btn" id="eabort">Abandonner</button></div>`;
+      app.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{const ok=b.dataset.r==="1";ent.res[i]=ok;const r=store.get("entrev",{});if(ok)delete r[i];else r[i]=1;store.set("entrev",r);ent.pos++;ent.show=false;draw()})}
+    else{if(entT){clearInterval(entT);entT=null}const ok=Object.values(ent.res).filter(Boolean).length;
+      if(!ent.saved){const h=store.get("enthist",[]);h.push({d:Date.now(),n:L.length,ok,dur:Math.round(s)});store.set("enthist",h.slice(-30));ent.saved=true}
+      app.innerHTML=`<h1>Bilan de l'entretien</h1><div class="stats" style="margin-top:10px"><div><b>${ok}/${L.length}</b><span>Questions maîtrisées</span></div><div><b>${fmtMS(s)}</b><span>Durée totale</span></div><div><b>${s<=1500?"Oui":"Non"}</b><span>Dans les 25 minutes</span></div></div>
+      <div class="stack" style="margin-top:14px">${L.map(i=>`<div class="panel"><span class="${ent.res[i]?"v-ok":"v-ko"} small">${ent.res[i]?"À l'aise":"À revoir"}</span><div><b>${esc(E.questions[i].q)}</b></div><details style="margin-top:6px"><summary>Éléments de réponse</summary><ul class="small">${E.questions[i].p.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></details></div>`).join("")}</div>
+      <div class="row" style="margin-top:14px"><a class="btn primary" href="#entretien">Nouvel entretien</a><a class="btn" href="#entretien/banque">Banque de questions</a></div>`;return}
+    if($("#enext"))$("#enext").onclick=()=>{ent.pos=0;draw()};
+    if($("#eabort"))$("#eabort").onclick=()=>{ent=null;location.hash="#entretien"};
+    if($("#edet"))$("#edet").addEventListener("toggle",e=>{ent.show=e.target.open});};
+  draw();
+  entT=setInterval(()=>{if(!location.hash.startsWith("#entretien/go")||!ent){clearInterval(entT);entT=null;return}const s=el(),c=$("#eclk"),b=$("#ebar");if(!c)return;
+    if(ent.pos===-1){c.textContent=fmtMS(300-s);if(b)b.style.width=Math.min(100,s/3)+"%";if(s>=300)c.classList.add("v-ko")}
+    else{c.textContent=fmtMS(1500-s);if(b)b.style.width=Math.min(100,s/15)+"%";if(s>=1500)c.classList.add("v-ko")}},500);
 }
 
 /* ---------- Tableau de bord ---------- */
@@ -538,12 +604,12 @@ function vDissert(param){
 }
 
 /* ---------- Routeur ---------- */
-const VIEWS={recherche:vRecherche,favoris:vFavoris,imprimer:vImprimer,sujets:vSujets,examen:vExam,bord:vBord,cours:vCours,qcm:vQcm,fiches:vFiches,juris:vJuris,delais:vDelais,calcul:vCalcul,qualif:vQualif,cas:vCas,doctrine:vDoctrine,dissert:vDissert};
+const VIEWS={recherche:vRecherche,favoris:vFavoris,imprimer:vImprimer,sujets:vSujets,entretien:vEntretien,examen:vExam,bord:vBord,cours:vCours,qcm:vQcm,fiches:vFiches,juris:vJuris,delais:vDelais,calcul:vCalcul,qualif:vQualif,cas:vCas,doctrine:vDoctrine,dissert:vDissert};
 function route(){
   const [v,p]=location.hash.slice(1).split("/");
   const m=MODULES.find(x=>x.id===v)||(v==="imprimer"?{t:"Imprimer"}:null);
   back.hidden=!m; ttl.textContent=m?m.t:"Atelier de procédure";
-  back.href=(p&&["cours","cas","doctrine","dissert","sujets"].includes(v))?"#"+v:(v==="imprimer"&&p?"#cours/"+p:"#");
+  back.href=(p&&["cours","cas","doctrine","dissert","sujets","entretien"].includes(v))?"#"+v:(v==="imprimer"&&p?"#cours/"+p:"#");
   document.querySelectorAll(".top .act a:not(#themeBtn)").forEach(a=>a.classList.toggle("on",a.getAttribute("href")==="#"+v));
   if(!["cours","imprimer"].includes(v))app.style.removeProperty("--vc");
   (VIEWS[v]||vHome)(p);
