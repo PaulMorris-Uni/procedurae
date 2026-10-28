@@ -26,7 +26,7 @@ const ICO={
  favoris:SV('<path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.2l1.1-6.2L3 9.6l6.2-.9z"/>'),
  imprimer:SV('<path d="M6 9V2h12v7"/><rect x="2" y="9" width="20" height="9" rx="2"/><path d="M6 14h12v8H6z"/>')
 };
-const VCOL={lib:"var(--v-lib)",pc:"var(--v-pc)",mard:"var(--v-mard)",arb:"var(--v-arb)",pce:"var(--v-pce)"};
+const VCOL={lib:"var(--v-lib)",pc:"var(--v-pc)",mard:"var(--v-mard)",arb:"var(--v-arb)",pce:"var(--v-pce)",cph:"var(--v-cph)"};
 const vcOf=c=>VCOL[(CH.find(x=>x.id===c)||{}).v]||"var(--accent)";
 const tagCh=c=>`<span class="tag" style="--vc:${vcOf(c)}">${esc(chName(c))}</span>`;
 const favs=()=>store.get("fav",{});
@@ -38,16 +38,17 @@ const norm=s=>String(s).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
    CRFPA : arrêté du 17 octobre 2016 modifié (procédure civile, modes amiables, arbitrage, procédures civiles d'exécution).
    ENM : arrêté du 31 décembre 2008 modifié, épreuve de droit civil et procédure civile (rubriques A à J).
    Greffier : arrêté du 29 avril 2016 modifié, épreuve écrite n° 2, partie procédure civile. */
+const PRUD=["p1","p2","p3","p4","p5","p6","p7","p8"];
 const PCH=["pd","act","comp","juge","intro","del","def","inst","pre","jug","urg","vro","vre"];
 const CONC={
- crfpa:{t:"CRFPA",ch:null,ref:"Arrêté du 17 octobre 2016 modifié",ep:"Épreuve écrite d'admissibilité de procédure (2 heures, coefficient 2), sous la forme d'une ou plusieurs consultations. La procédure civile est l'épreuve de procédure des candidats ayant choisi la spécialité droit civil, droit des affaires ou droit social ; en droit international et européen et en droit fiscal, le candidat choisit entre procédure civile et procédure administrative. Programme : procédure civile, modes amiables de résolution des différends, arbitrage, procédures civiles d'exécution. Tout le contenu de l'application est concerné."},
+ crfpa:{t:"CRFPA",ch:CH.filter(c=>c.v!=="cph").map(c=>c.id),ref:"Arrêté du 17 octobre 2016 modifié",ep:"Épreuve écrite d'admissibilité de procédure (2 heures, coefficient 2), sous la forme d'une ou plusieurs consultations. La procédure civile est l'épreuve de procédure des candidats ayant choisi la spécialité droit civil, droit des affaires ou droit social ; en droit international et européen et en droit fiscal, le candidat choisit entre procédure civile et procédure administrative. Programme : procédure civile, modes amiables de résolution des différends, arbitrage, procédures civiles d'exécution. Tout le contenu de l'application est concerné, à l'exception du volet de procédure prud'homale, qui ne figure pas au programme de l'épreuve."},
  enm:{t:"ENM",ch:PCH.filter(c=>c!=="frais").concat(["m1","m2","m3","m5"]),ref:"Arrêté du 31 décembre 2008 modifié",ep:"Épreuve écrite d'admissibilité de droit civil et procédure civile : composition ou cas pratique au choix du jury (premier concours), cas pratique (deuxième concours), cas pratique ou questions à réponse courte au choix du candidat (troisième concours). Le programme vise l'action en justice, les actes de procédure, les délais, les principes directeurs et l'influence du droit européen, la preuve, les procédures contentieuse et gracieuse, les effets du jugement, les voies de recours et les modes amiables (médiation et conciliation). L'arbitrage, les procédures civiles d'exécution, les procédures participatives et les frais du procès en sont exclus."},
  go:{t:"Grand oral CRFPA",ch:["l1","l2","l3","l4","l5","l6","l7","l8"],ref:"Arrêté du 17 octobre 2016 modifié, art. 7",ep:"Épreuve d'admission : exposé de quinze minutes, après une préparation d'une heure, sur un sujet relatif à la protection des libertés et des droits fondamentaux, suivi d'un entretien de trente minutes avec le jury ; séance publique ; coefficient 4. Le programme couvre la culture juridique générale, l'origine et les sources, le régime juridique et les principales libertés. Le filtre n'affiche que le volet Grand oral."},
- greffier:{t:"Greffier (procédure civile)",ch:PCH.concat(["m2","e1"]),ref:"Arrêté du 29 avril 2016 modifié",ep:"Épreuve écrite d'admissibilité n° 2 (3 heures, coefficient 4) : organisation judiciaire et administrative, puis, au choix, procédure civile et prud'homale ou procédure pénale. L'application couvre la partie procédure civile, y compris la conciliation et l'exécution des jugements ; elle ne traite ni la procédure prud'homale, ni l'organisation de la cour d'assises, des juridictions des mineurs et de l'ordre administratif, ni les auxiliaires de justice."}
+ greffier:{t:"Greffier",ch:PCH.concat(["m2","e1"],PRUD),ref:"Arrêté du 29 avril 2016 modifié",ep:"Épreuve écrite d'admissibilité n° 2 (3 heures, coefficient 4) : organisation judiciaire et administrative, puis, au choix, procédure civile et prud'homale ou procédure pénale. L'application couvre la procédure civile, y compris la conciliation et l'exécution des jugements, ainsi que la procédure prud'homale et l'organisation du conseil de prud'hommes ; elle ne traite ni l'organisation de la cour d'assises, des juridictions des mineurs et de l'ordre administratif, ni les auxiliaires de justice, ni la procédure pénale."}
 };
 const conc=()=>{const k=store.get("conc","");return CONC[k]?k:""};
 const inConc=c=>{const k=conc();return !k||!CONC[k].ch||CONC[k].ch.includes(c)};
-const delaiCh=x=>{const t=x.t;if(/CPCE/.test(t))return /L\. 111-4/.test(t)?"e1":/R\. 511/.test(t)?"e3":/R\. 211/.test(t)?"e4":"e5";if(/1343-5/.test(t))return "e1";if(/1534/.test(t))return "m2";if(/2238/.test(t))return "m1";if(/1463/.test(t))return "a2";if(/1494|1519/.test(t))return "a3";return "del"};
+const delaiCh=x=>{const t=x.t;if(/CPCE/.test(t))return /L\. 111-4/.test(t)?"e1":/R\. 511/.test(t)?"e3":/R\. 211/.test(t)?"e4":"e5";if(/1343-5/.test(t))return "e1";if(/1534/.test(t))return "m2";if(/2238/.test(t))return "m1";if(/1463/.test(t))return "a2";if(/1494|1519/.test(t))return "a3";if(/C\. trav/.test(t))return /R\. 1461|R\. 1455-11/.test(t)?"p8":/4624/.test(t)?"p7":/1454/.test(t)?(/L\. 1454-1-1/.test(t)?"p5":"p6"):"p3";return "del"};
 function applyConc(){D.qcm=ALL.qcm.filter(q=>inConc(q.c));D.fiches=ALL.fiches.filter(x=>inConc(x.c));D.juris=ALL.juris.filter(x=>inConc(x.c));D.cas=ALL.cas;D.delais=ALL.delais;D.qualif=ALL.qualif}
 applyConc();
 const concNote=()=>{const k=conc();return k?`<p class="small muted" style="margin-top:-4px">Filtre actif : programme ${esc(CONC[k].t)} · <a href="#" style="color:var(--accent)">modifier depuis l'accueil</a></p>`:""};
@@ -91,8 +92,8 @@ function vHome(){
   const due=D.qcm.filter(q=>qDue(qs[q.id])).length;
   const GR=[["a","Apprendre"],["e","S'entraîner"],["o","Suivre et chercher"]];
   const VID={pc:"cours",mard:"cours",arb:"cours",pce:"cours"};
-  app.innerHTML=`<section class="cover"><div class="eyebrow">${conc()==="go"?"CRFPA · Grand oral · Libertés et droits fondamentaux":"CRFPA · Grand oral · ENM · Greffier (procédure civile)"}</div><h1>Atelier procédure civile</h1>
-  <p class="lead">Cours, entraînement et outils pour réviser la procédure civile. Votre progression reste enregistrée sur cet appareil.</p>
+  app.innerHTML=`<section class="cover"><div class="eyebrow">${conc()==="go"?"CRFPA · Grand oral · Libertés et droits fondamentaux":"CRFPA · Grand oral · ENM · Greffier"}</div><h1>Atelier de procédure</h1>
+  <p class="lead">Cours, entraînement et outils pour réviser la procédure civile et la procédure prud'homale. Votre progression reste enregistrée sur cet appareil.</p>
   <div class="maj">Textes à jour au 27 octobre 2026</div>
   <div class="row" style="margin-top:16px">${[["","Tous"]].concat(Object.keys(CONC).map(k=>[k,CONC[k].t])).map(([k,n])=>`<button class="chip ${conc()===k?"on":""}" data-conc="${k}">${esc(n)}</button>`).join("")}</div>
   ${conc()?`<p class="concinfo">${esc(CONC[conc()].ep)} <span style="opacity:.8">${esc(CONC[conc()].ref)}.</span></p>`:`<p class="concinfo">Choisissez votre concours pour n'afficher que son programme.</p>`}
@@ -102,7 +103,7 @@ function vHome(){
   <div class="row" style="margin-top:14px">${due?`<a class="btn primary" href="#qcm">${due} QCM à réviser aujourd'hui</a>`:`<a class="btn primary" href="#qcm">Lancer une série de QCM</a>`}<a class="btn" href="#bord">${ICO.bord.replace('<svg','<svg width="18" height="18"')} Tableau de bord</a></div>
   ${GR.map(([g,lab])=>`<div class="grp">${lab}</div><div class="grid">${MODULES.filter(m=>m.g===g).map((m,i,arr)=>`<a class="tile ${i<(3-arr.length%3)%3?"wide":""}" href="#${m.id}"><span class="ico">${ICO[m.id]||""}</span><span class="n">${m.n()}</span><b>${m.t}</b><span>${m.d}</span></a>`).join("")}</div>`).join("")}
   <div class="panel install" id="inst" hidden style="margin-top:16px"><span class="small">Installez l'application sur votre écran d'accueil pour l'utiliser hors connexion.</span><button class="btn primary" id="instBtn">Installer</button></div>
-  <p class="note">Contenus établis d'après le <a href="https://www.legifrance.gouv.fr/codes/texte_lc/LEGITEXT000006070716" target="_blank" rel="noopener">Code de procédure civile</a> et le <a href="https://www.legifrance.gouv.fr/codes/texte_lc/LEGITEXT000006070721" target="_blank" rel="noopener">Code civil</a> applicables au 27 octobre 2026, compte tenu des décrets n° 2023-1391, n° 2024-673, n° 2025-660 et n° 2026-683. Programme de référence : arrêté du 17 octobre 2016 modifié (CRFPA), arrêté du 31 décembre 2008 modifié (ENM) et arrêté du 29 avril 2016 modifié (concours de greffier des services judiciaires, partie procédure civile). Contenus confrontés à N. Cayrol, <i>Procédure civile</i>, Dalloz, coll. Cours, 5e éd., 2025. Support d'entraînement : vérifiez toujours les textes en vigueur.</p>
+  <p class="note">Contenus établis d'après le <a href="https://www.legifrance.gouv.fr/codes/texte_lc/LEGITEXT000006070716" target="_blank" rel="noopener">Code de procédure civile</a> et le <a href="https://www.legifrance.gouv.fr/codes/texte_lc/LEGITEXT000006070721" target="_blank" rel="noopener">Code civil</a> et le <a href="https://www.legifrance.gouv.fr/codes/texte_lc/LEGITEXT000006072050" target="_blank" rel="noopener">Code du travail</a> applicables au 27 octobre 2026, compte tenu des décrets n° 2023-1391, n° 2024-673, n° 2025-660 et n° 2026-683. Programme de référence : arrêté du 17 octobre 2016 modifié (CRFPA), arrêté du 31 décembre 2008 modifié (ENM) et arrêté du 29 avril 2016 modifié (concours de greffier des services judiciaires, procédure civile et prud'homale). Contenus confrontés à N. Cayrol, <i>Procédure civile</i>, Dalloz, coll. Cours, 5e éd., 2025. Support d'entraînement : vérifiez toujours les textes en vigueur.</p>
   <p class="note"><button class="btn" id="wipe">Effacer toute ma progression</button></p>`;
   app.querySelectorAll("[data-conc]").forEach(b=>b.onclick=()=>{store.set("conc",b.dataset.conc);applyConc();resetViews();vHome()});
   if(deferredPrompt){$("#inst").hidden=false;$("#instBtn").onclick=async()=>{deferredPrompt.prompt();deferredPrompt=null;$("#inst").hidden=true}}
@@ -199,7 +200,7 @@ function vJuris(param){
 }
 
 /* ---------- Tableau des délais ---------- */
-const DUR=["15 jours","1 mois","2 mois","3 mois","5 mois","6 mois","1 an","2 ans","10 ans","30 ans"];
+const DUR=["15 jours","1 mois","2 mois","3 mois","5 mois","6 mois","1 an","2 ans","3 ans","5 ans","10 ans","30 ans"];
 let dChecked=false;
 function vDelais(){
   const ans=store.get("dans",{});
@@ -403,7 +404,7 @@ function vImprimer(param){
   ttl.textContent="Imprimer : "+c.titre;app.style.setProperty("--vc",vcOf(c.id));
   const F=ALL.fiches.filter(f=>f.c===c.id),J=ALL.juris.filter(j=>j.c===c.id);
   app.innerHTML=`<div class="panel noprint" style="margin-bottom:18px"><p style="margin:0 0 10px">Version imprimable du chapitre, avec ses fiches mémoire et ses arrêts. Pour un PDF, choisissez « Enregistrer au format PDF » comme imprimante.</p><div class="row"><button class="btn primary" id="pgo">${ICO.imprimer.replace('<svg','<svg width="18" height="18"')} Imprimer ou enregistrer en PDF</button><a class="btn" href="#cours/${c.id}">Retour au chapitre</a></div><p class="small muted" id="pmsg" style="margin:8px 0 0"></p></div>
-  <div class="eyebrow" style="color:var(--vc)">${esc((VO.find(v=>v.id===c.v)||{}).titre||"")} · Atelier procédure civile</div><h1>${esc(c.titre)}</h1>
+  <div class="eyebrow" style="color:var(--vc)">${esc((VO.find(v=>v.id===c.v)||{}).titre||"")} · Atelier de procédure</div><h1>${esc(c.titre)}</h1>
   ${c.sections.map(s=>`<div class="sec"><h3>${esc(s.h)}</h3>${s.p.map(p=>`<p>${esc(p)}</p>`).join("")}</div>`).join("")}
   ${F.length?`<h2 style="margin-top:26px">Fiches mémoire</h2><div class="stack">${F.map(f=>`<div class="panel"><div style="font-weight:700">${esc(f.q)}</div><p style="margin:6px 0 4px">${esc(f.a)}</p><div class="ref">${esc(f.r)}</div></div>`).join("")}</div>`:""}
   ${J.length?`<h2 style="margin-top:26px">Arrêts</h2><div class="stack">${J.map(j=>`<div class="panel"><div style="font-weight:700">${esc(j.nom)}</div><div class="ref">${esc(j.ref)}</div><p style="margin:6px 0 4px">${esc(j.sol)}</p><p class="small muted" style="margin:0">${esc(j.portee)}</p></div>`).join("")}</div>`:""}
@@ -526,7 +527,7 @@ const VIEWS={recherche:vRecherche,favoris:vFavoris,imprimer:vImprimer,sujets:vSu
 function route(){
   const [v,p]=location.hash.slice(1).split("/");
   const m=MODULES.find(x=>x.id===v)||(v==="imprimer"?{t:"Imprimer"}:null);
-  back.hidden=!m; ttl.textContent=m?m.t:"Atelier procédure civile";
+  back.hidden=!m; ttl.textContent=m?m.t:"Atelier de procédure";
   back.href=(p&&["cours","cas","doctrine","dissert","sujets"].includes(v))?"#"+v:(v==="imprimer"&&p?"#cours/"+p:"#");
   document.querySelectorAll(".top .act a:not(#themeBtn)").forEach(a=>a.classList.toggle("on",a.getAttribute("href")==="#"+v));
   if(!["cours","imprimer"].includes(v))app.style.removeProperty("--vc");

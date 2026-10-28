@@ -1,5 +1,5 @@
 /* Service worker : met l'application en cache pour un usage hors connexion. Changer VERSION à chaque mise à jour du contenu. */
-const VERSION = "apc-v15";
+const VERSION = "apc-v16";
 const FILES = ["./", "index.html", "manifest.json", "cours.js", "data.js", "doctrine.js", "sujets.js", "app.js", "icon-192.png", "icon-512.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== VERSION).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
