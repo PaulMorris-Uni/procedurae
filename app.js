@@ -99,6 +99,7 @@ function vHome(){
   ${conc()?`<p class="concinfo">${esc(CONC[conc()].ep)} <span style="opacity:.8">${esc(CONC[conc()].ref)}.</span></p>`:`<p class="concinfo">Choisissez votre concours pour n'afficher que son programme.</p>`}
   <div class="stats"><div><b>${done.length}/${D.qcm.length}</b><span>QCM traités</span></div><div><b>${done.length?Math.round(ok/done.length*100):0} %</b><span>QCM réussis</span></div><div><b>${known}/${D.fiches.length}</b><span>Fiches maîtrisées</span></div></div>
   </section>
+  <div class="panel" id="iosInst" hidden style="margin-top:16px;margin-bottom:4px"><b>Installer l'application sur iPhone ou iPad</b><ol class="small" style="margin:8px 0 10px;padding-left:20px"><li>Ouvrez ce site dans Safari.</li><li>Touchez le bouton Partager (le carré avec une flèche vers le haut), en bas ou en haut de l'écran.</li><li>Choisissez « Sur l'écran d'accueil », puis « Ajouter ».</li></ol><p class="small muted" style="margin:0 0 10px">L'application s'ouvre alors en plein écran et fonctionne hors connexion. Tant qu'elle n'est pas installée, Safari peut effacer votre progression après sept jours sans visite : pensez à l'exporter depuis le <a href="#bord" style="color:var(--accent)">tableau de bord</a>.</p><button class="btn" id="iosLater">Masquer ce message</button></div>
   <div class="volets">${VO.filter(v=>CH.some(c=>c.v===v.id&&inConc(c.id))).map(v=>`<a class="vchip" style="--vc:${VCOL[v.id]}" href="#cours/v:${v.id}"><i></i>${esc(v.titre)}</a>`).join("")}</div>
   <div class="row" style="margin-top:14px">${due?`<a class="btn primary" href="#qcm">${due} QCM à réviser aujourd'hui</a>`:`<a class="btn primary" href="#qcm">Lancer une série de QCM</a>`}<a class="btn" href="#bord">${ICO.bord.replace('<svg','<svg width="18" height="18"')} Tableau de bord</a></div>
   ${GR.map(([g,lab])=>`<div class="grp">${lab}</div><div class="grid">${MODULES.filter(m=>m.g===g).map((m,i,arr)=>`<a class="tile ${i<(3-arr.length%3)%3?"wide":""}" href="#${m.id}"><span class="ico">${ICO[m.id]||""}</span><span class="n">${m.n()}</span><b>${m.t}</b><span>${m.d}</span></a>`).join("")}</div>`).join("")}
@@ -106,7 +107,8 @@ function vHome(){
   <p class="note">Contenus établis d'après le <a href="https://www.legifrance.gouv.fr/codes/texte_lc/LEGITEXT000006070716" target="_blank" rel="noopener">Code de procédure civile</a> et le <a href="https://www.legifrance.gouv.fr/codes/texte_lc/LEGITEXT000006070721" target="_blank" rel="noopener">Code civil</a> et le <a href="https://www.legifrance.gouv.fr/codes/texte_lc/LEGITEXT000006072050" target="_blank" rel="noopener">Code du travail</a> applicables au 28 octobre 2026, compte tenu des décrets n° 2023-1391, n° 2024-673, n° 2025-660 et n° 2026-683. Programme de référence : arrêté du 17 octobre 2016 modifié (CRFPA), arrêté du 31 décembre 2008 modifié (ENM) et arrêté du 29 avril 2016 modifié (concours de greffier des services judiciaires, procédure civile et prud'homale). Contenus confrontés à N. Cayrol, <i>Procédure civile</i>, Dalloz, coll. Cours, 5e éd., 2025. Support d'entraînement : vérifiez toujours les textes en vigueur.</p>
   <p class="note"><button class="btn" id="wipe">Effacer toute ma progression</button></p>`;
   app.querySelectorAll("[data-conc]").forEach(b=>b.onclick=()=>{store.set("conc",b.dataset.conc);applyConc();resetViews();vHome()});
-  if(deferredPrompt){$("#inst").hidden=false;$("#instBtn").onclick=async()=>{deferredPrompt.prompt();deferredPrompt=null;$("#inst").hidden=true}}
+  if(IOS&&!STANDALONE&&!store.get("iosHide",0)){const h=$("#iosInst");h.hidden=false;$("#iosLater").onclick=()=>{store.set("iosHide",1);h.hidden=true}}
+  if(deferredPrompt&&!IOS){$("#inst").hidden=false;$("#instBtn").onclick=async()=>{deferredPrompt.prompt();deferredPrompt=null;$("#inst").hidden=true}}
   $("#wipe").onclick=e=>{const b=e.target;if(b.dataset.c){["qcm","fbox","dans","cas","act","qual","suj","fav"].forEach(k=>store.set(k,{}));store.set("exams",[]);b.textContent="Progression effacée";delete b.dataset.c;setTimeout(()=>route(),800)}else{b.dataset.c=1;b.textContent="Confirmer l'effacement"}};
 }
 
@@ -548,7 +550,10 @@ function route(){
   if(!p||v!=="qcm")window.scrollTo(0,0);
 }
 let deferredPrompt=null;
-window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredPrompt=e;const i=$("#inst");if(i){i.hidden=false;$("#instBtn").onclick=()=>{deferredPrompt.prompt();deferredPrompt=null;i.hidden=true}}});
+const IOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+const STANDALONE=window.navigator.standalone===true||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches);
+try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{})}catch(e){}
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredPrompt=e;const i=$("#inst");if(i&&!IOS){i.hidden=false;$("#instBtn").onclick=()=>{deferredPrompt.prompt();deferredPrompt=null;i.hidden=true}}});
 const TH={auto:"automatique (selon l'appareil)",light:"clair",dark:"sombre"};
 function applyTheme(m){const r=document.documentElement;if(m==="light"||m==="dark")r.setAttribute("data-theme",m);else r.removeAttribute("data-theme");const b=document.getElementById("themeBtn");if(b){b.title="Thème : "+TH[m]+". Toucher pour changer.";b.setAttribute("aria-label",b.title)}}
 applyTheme(store.get("theme","auto"));
