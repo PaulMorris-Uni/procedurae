@@ -38,7 +38,7 @@ const norm=s=>String(s).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
    CRFPA : arrêté du 17 octobre 2016 modifié (procédure civile, modes amiables, arbitrage, procédures civiles d'exécution).
    ENM : arrêté du 31 décembre 2008 modifié, épreuve de droit civil et procédure civile (rubriques A à J).
    Greffier : arrêté du 29 avril 2016 modifié, épreuve écrite n° 2, partie procédure civile. */
-const PRUD=["p1","p2","p3","p4","p5","p6","p7","p8"];
+const PRUD=["p1","p2","p3","p4","p5","p6","p7","p8","p9"];
 const PCH=["pd","act","comp","juge","intro","del","def","inst","pre","jug","urg","vro","vre"];
 const CONC={
  crfpa:{t:"CRFPA",ch:CH.filter(c=>c.v!=="cph").map(c=>c.id),ref:"Arrêté du 17 octobre 2016 modifié",ep:"Épreuve écrite d'admissibilité de procédure (2 heures, coefficient 2), sous la forme d'une ou plusieurs consultations. La procédure civile est l'épreuve de procédure des candidats ayant choisi la spécialité droit civil, droit des affaires ou droit social ; en droit international et européen et en droit fiscal, le candidat choisit entre procédure civile et procédure administrative. Programme : procédure civile, modes amiables de résolution des différends, arbitrage, procédures civiles d'exécution. Tout le contenu de l'application est concerné, à l'exception du volet de procédure prud'homale, qui ne figure pas au programme de l'épreuve."},
@@ -48,7 +48,7 @@ const CONC={
 };
 const conc=()=>{const k=store.get("conc","");return CONC[k]?k:""};
 const inConc=c=>{const k=conc();return !k||!CONC[k].ch||CONC[k].ch.includes(c)};
-const delaiCh=x=>{const t=x.t;if(/CPCE/.test(t))return /L\. 111-4/.test(t)?"e1":/R\. 511/.test(t)?"e3":/R\. 211/.test(t)?"e4":"e5";if(/1343-5/.test(t))return "e1";if(/1534/.test(t))return "m2";if(/2238/.test(t))return "m1";if(/1463/.test(t))return "a2";if(/1494|1519/.test(t))return "a3";if(/C\. trav/.test(t))return /R\. 1461|R\. 1455-11/.test(t)?"p8":/4624/.test(t)?"p7":/1454/.test(t)?(/L\. 1454-1-1/.test(t)?"p5":"p6"):"p3";return "del"};
+const delaiCh=x=>{const t=x.t;if(/CPCE/.test(t))return /L\. 111-4/.test(t)?"e1":/R\. 511/.test(t)?"e3":/R\. 211/.test(t)?"e4":"e5";if(/1343-5/.test(t))return "e1";if(/1534/.test(t))return "m2";if(/2238/.test(t))return "m1";if(/1463/.test(t))return "a2";if(/1494|1519/.test(t))return "a3";if(/C\. trav/.test(t))return /R\. 1461|R\. 1455-11/.test(t)?"p8":/4624/.test(t)?"p7":/L\. 1245-2|L\. 1451-1|L\. 1454-1-1|R\. 1454-12/.test(t)?"p5":/1454/.test(t)?"p6":"p3";return "del"};
 function applyConc(){D.qcm=ALL.qcm.filter(q=>inConc(q.c));D.fiches=ALL.fiches.filter(x=>inConc(x.c));D.juris=ALL.juris.filter(x=>inConc(x.c));D.cas=ALL.cas;D.delais=ALL.delais;D.qualif=ALL.qualif}
 applyConc();
 const concNote=()=>{const k=conc();return k?`<p class="small muted" style="margin-top:-4px">Filtre actif : programme ${esc(CONC[k].t)} · <a href="#" style="color:var(--accent)">modifier depuis l'accueil</a></p>`:""};
@@ -94,7 +94,7 @@ function vHome(){
   const VID={pc:"cours",mard:"cours",arb:"cours",pce:"cours"};
   app.innerHTML=`<section class="cover"><div class="eyebrow">${conc()==="go"?"CRFPA · Grand oral · Libertés et droits fondamentaux":"CRFPA · Grand oral · ENM · Greffier"}</div><h1>Atelier de procédure</h1>
   <p class="lead">Cours, entraînement et outils pour réviser la procédure civile et la procédure prud'homale. Votre progression reste enregistrée sur cet appareil.</p>
-  <div class="maj">Textes à jour au 27 octobre 2026</div>
+  <div class="maj">Textes à jour au 28 octobre 2026</div>
   <div class="row" style="margin-top:16px">${[["","Tous"]].concat(Object.keys(CONC).map(k=>[k,CONC[k].t])).map(([k,n])=>`<button class="chip ${conc()===k?"on":""}" data-conc="${k}">${esc(n)}</button>`).join("")}</div>
   ${conc()?`<p class="concinfo">${esc(CONC[conc()].ep)} <span style="opacity:.8">${esc(CONC[conc()].ref)}.</span></p>`:`<p class="concinfo">Choisissez votre concours pour n'afficher que son programme.</p>`}
   <div class="stats"><div><b>${done.length}/${D.qcm.length}</b><span>QCM traités</span></div><div><b>${done.length?Math.round(ok/done.length*100):0} %</b><span>QCM réussis</span></div><div><b>${known}/${D.fiches.length}</b><span>Fiches maîtrisées</span></div></div>
@@ -103,7 +103,7 @@ function vHome(){
   <div class="row" style="margin-top:14px">${due?`<a class="btn primary" href="#qcm">${due} QCM à réviser aujourd'hui</a>`:`<a class="btn primary" href="#qcm">Lancer une série de QCM</a>`}<a class="btn" href="#bord">${ICO.bord.replace('<svg','<svg width="18" height="18"')} Tableau de bord</a></div>
   ${GR.map(([g,lab])=>`<div class="grp">${lab}</div><div class="grid">${MODULES.filter(m=>m.g===g).map((m,i,arr)=>`<a class="tile ${i<(3-arr.length%3)%3?"wide":""}" href="#${m.id}"><span class="ico">${ICO[m.id]||""}</span><span class="n">${m.n()}</span><b>${m.t}</b><span>${m.d}</span></a>`).join("")}</div>`).join("")}
   <div class="panel install" id="inst" hidden style="margin-top:16px"><span class="small">Installez l'application sur votre écran d'accueil pour l'utiliser hors connexion.</span><button class="btn primary" id="instBtn">Installer</button></div>
-  <p class="note">Contenus établis d'après le <a href="https://www.legifrance.gouv.fr/codes/texte_lc/LEGITEXT000006070716" target="_blank" rel="noopener">Code de procédure civile</a> et le <a href="https://www.legifrance.gouv.fr/codes/texte_lc/LEGITEXT000006070721" target="_blank" rel="noopener">Code civil</a> et le <a href="https://www.legifrance.gouv.fr/codes/texte_lc/LEGITEXT000006072050" target="_blank" rel="noopener">Code du travail</a> applicables au 27 octobre 2026, compte tenu des décrets n° 2023-1391, n° 2024-673, n° 2025-660 et n° 2026-683. Programme de référence : arrêté du 17 octobre 2016 modifié (CRFPA), arrêté du 31 décembre 2008 modifié (ENM) et arrêté du 29 avril 2016 modifié (concours de greffier des services judiciaires, procédure civile et prud'homale). Contenus confrontés à N. Cayrol, <i>Procédure civile</i>, Dalloz, coll. Cours, 5e éd., 2025. Support d'entraînement : vérifiez toujours les textes en vigueur.</p>
+  <p class="note">Contenus établis d'après le <a href="https://www.legifrance.gouv.fr/codes/texte_lc/LEGITEXT000006070716" target="_blank" rel="noopener">Code de procédure civile</a> et le <a href="https://www.legifrance.gouv.fr/codes/texte_lc/LEGITEXT000006070721" target="_blank" rel="noopener">Code civil</a> et le <a href="https://www.legifrance.gouv.fr/codes/texte_lc/LEGITEXT000006072050" target="_blank" rel="noopener">Code du travail</a> applicables au 28 octobre 2026, compte tenu des décrets n° 2023-1391, n° 2024-673, n° 2025-660 et n° 2026-683. Programme de référence : arrêté du 17 octobre 2016 modifié (CRFPA), arrêté du 31 décembre 2008 modifié (ENM) et arrêté du 29 avril 2016 modifié (concours de greffier des services judiciaires, procédure civile et prud'homale). Contenus confrontés à N. Cayrol, <i>Procédure civile</i>, Dalloz, coll. Cours, 5e éd., 2025. Support d'entraînement : vérifiez toujours les textes en vigueur.</p>
   <p class="note"><button class="btn" id="wipe">Effacer toute ma progression</button></p>`;
   app.querySelectorAll("[data-conc]").forEach(b=>b.onclick=()=>{store.set("conc",b.dataset.conc);applyConc();resetViews();vHome()});
   if(deferredPrompt){$("#inst").hidden=false;$("#instBtn").onclick=async()=>{deferredPrompt.prompt();deferredPrompt=null;$("#inst").hidden=true}}
@@ -273,13 +273,24 @@ function vCas(param){
     app.innerHTML=`${tagCh(c.c)}<h1 style="margin-top:8px">${esc(c.titre)}</h1><div class="panel"><p>${esc(c.enonce)}</p></div>
     <div class="stack" style="margin-top:14px">${c.questions.map((q,i)=>`<div class="panel"><h3 style="margin-top:0">Question ${i+1}</h3><p>${esc(q.q)}</p>
     <label class="small muted" for="n${i}">Votre réponse (enregistrée sur cet appareil)</label><textarea id="n${i}" data-k="${param}-${i}">${esc(notes[param+"-"+i]||"")}</textarea>
-    <details style="margin-top:10px"><summary>Afficher le corrigé</summary><div class="corr">${esc(q.corr)}</div></details></div>`).join("")}</div>
-    <p class="note">Méthode : pour chaque question, identifier le problème, énoncer la règle avec son texte, l'appliquer aux faits, conclure.</p>`;
+    <details style="margin-top:10px"><summary>Afficher le corrigé</summary><div class="corr">${paras(q.corr).map(cpara).join("")}</div></details></div>`).join("")}</div>
+    <div class="row" style="margin-top:14px"><button class="btn" id="cexp">Exporter le corrigé (Word)</button></div><p class="note">Méthode : pour chaque question, identifier le problème, énoncer la règle avec son texte, l'appliquer aux faits, conclure.</p>`;
+    $("#cexp").onclick=()=>exportDoc("corrige-"+c.titre,c.titre,"Cas pratique · "+chName(c.c),c.enonce,c.questions);
     app.querySelectorAll("textarea").forEach(t=>t.addEventListener("input",()=>{const n=store.get("cas",{});n[t.dataset.k]=t.value;store.set("cas",n)}));return;}
   app.innerHTML=`<h1>Cas pratiques</h1><p class="lead">Énoncés au format de l'examen, avec corrigé rédigé selon la méthode problème, règle, application, conclusion.</p>
   ${concNote()}<div class="stack">${D.cas.map((c,i)=>!inConc(c.c)?"":`<a class="tile" href="#cas/${i}"><span class="n">${esc(chName(c.c))} · ${c.questions.length} questions</span><b>${esc(c.titre)}</b><span>${esc(c.enonce.slice(0,140))}…</span></a>`).join("")}</div>`;
 }
 
+
+/* ---------- Export Word des corrigés (Times New Roman 12) ---------- */
+const paras=c=>Array.isArray(c)?c:[c];
+const cpara=t=>{const m=/^(Problème|Règle|Application|Conclusion|Point de vigilance|Principe|Définition|Conditions|Effets|Régime|Procédure|Composition|Pouvoirs|Délais|Limites|Rôle du greffe|Fonctionnement|Sections|Formations|Hypothèse|Appel|Requête|Réforme|Greffe|Mesures|Plafond|Défendeur|Demandeur|Renvoi|Personnes habilitées|Défenseur syndical|Mineurs|Saisines particulières|Intérêt et portée|Formation incomplète|Opposition et pourvoi|Cas particuliers|Exécution et appel|Rapport de la caducité|Mesures provisoires|Renvoi au fond|Procédure accélérée au fond|Juridiction paritaire)\. /.exec(t);return m?`<p><b>${esc(m[1])}.</b> ${esc(t.slice(m[0].length))}</p>`:`<p>${esc(t)}</p>`};
+function exportDoc(name,titre,meta,enonce,qs){
+  const P=cpara;
+  const body=`<h1>${esc(titre)}</h1>${meta?`<p class="meta">${esc(meta)}</p>`:""}<h2>Énoncé</h2>${P(enonce)}`+qs.map((q,i)=>`<h2>${qs.length>1?"Question "+(i+1):"Sujet"}</h2><p><b>${esc(q.q)}</b></p><h3>Corrigé</h3>${paras(q.corr).map(P).join("")}${q.grille?`<h3>Éléments attendus</h3><ul>${q.grille.map(g=>`<li>${esc(g[0])} (${fmtN(g[1])} pt)</li>`).join("")}</ul>`:""}`).join("")+`<p class="meta">Atelier de procédure. Corrigé d'entraînement établi d'après les textes en vigueur au 28 octobre 2026 ; vérifiez toujours les textes applicables.</p>`;
+  const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>${esc(titre)}</title><style>@page{size:21cm 29.7cm;margin:2.5cm}body,p,li,h1,h2,h3{font-family:"Times New Roman",serif;font-size:12pt}body{line-height:1.15}h1{font-weight:bold;text-align:center;margin:0 0 12pt}h2{font-weight:bold;margin:14pt 0 6pt}h3{font-weight:bold;font-style:italic;margin:10pt 0 4pt}p{text-align:justify;margin:0 0 6pt}.meta{font-style:italic}</style></head><body>${body}</body></html>`;
+  const blob=new Blob(["﻿"+html],{type:"application/msword"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name.replace(/[^\wÀ-ÿ-]+/g,"-").replace(/-+/g,"-").toLowerCase()+".doc";document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500);toast("Corrigé exporté au format Word");
+}
 
 /* ---------- Tableau de bord ---------- */
 function chapStats(){
@@ -363,6 +374,7 @@ function searchIndex(){
   ALL.qcm.forEach(q=>I.push({k:"QCM",c:q.c,t:q.q,x:q.o.map(o=>o[0]).join(" ")+" "+q.e,qid:q.id,body:`<p class="small"><b>Réponses exactes :</b> ${q.o.filter(o=>o[1]).map(o=>esc(o[0])).join(" ; ")}</p><p class="small">${esc(q.e)}</p><div class="ref">${q.r.map(esc).join(" · ")}</div>`}));
   ALL.juris.forEach(j=>I.push({k:"Arrêt",c:j.c,t:j.nom+" · "+j.ref,x:j.sol+" "+j.portee,jn:j.nom,body:`<p>${esc(j.sol)}</p><p class="small muted">${esc(j.portee)}</p>`}));
   (window.SUJETS||[]).forEach(s=>I.push({k:"Sujet "+CONC[s.conc].t,c:null,t:s.titre,x:s.enonce+" "+s.questions.map(q=>q.q+" "+q.corr.join(" ")).join(" "),h:"#sujets/"+s.id}));
+  ALL.cas.forEach((c,i)=>I.push({k:"Cas pratique",c:c.c,t:c.titre,x:c.enonce+" "+c.questions.map(q=>q.q+" "+paras(q.corr).join(" ")).join(" "),h:"#cas/"+i}));
   ALL.delais.forEach(d=>I.push({k:"Délai",c:delaiCh(d),t:d.a,x:d.d+" "+d.dep+" "+d.s+" "+d.t,body:`<p class="small"><b>${esc(d.d)}</b> · départ : ${esc(d.dep)}${d.s?" · sanction : "+esc(d.s):""}</p><div class="ref">${esc(d.t)}</div>`}));
   I.forEach(e=>{e.n=norm(e.t+" "+e.x)});return searchIndex.c=I;
 }
@@ -408,7 +420,7 @@ function vImprimer(param){
   ${c.sections.map(s=>`<div class="sec"><h3>${esc(s.h)}</h3>${s.p.map(p=>`<p>${esc(p)}</p>`).join("")}</div>`).join("")}
   ${F.length?`<h2 style="margin-top:26px">Fiches mémoire</h2><div class="stack">${F.map(f=>`<div class="panel"><div style="font-weight:700">${esc(f.q)}</div><p style="margin:6px 0 4px">${esc(f.a)}</p><div class="ref">${esc(f.r)}</div></div>`).join("")}</div>`:""}
   ${J.length?`<h2 style="margin-top:26px">Arrêts</h2><div class="stack">${J.map(j=>`<div class="panel"><div style="font-weight:700">${esc(j.nom)}</div><div class="ref">${esc(j.ref)}</div><p style="margin:6px 0 4px">${esc(j.sol)}</p><p class="small muted" style="margin:0">${esc(j.portee)}</p></div>`).join("")}</div>`:""}
-  <p class="note">Textes à jour au 27 octobre 2026. Support d'entraînement : vérifiez toujours les textes en vigueur.</p>`;
+  <p class="note">Textes à jour au 28 octobre 2026. Support d'entraînement : vérifiez toujours les textes en vigueur.</p>`;
   $("#pgo").onclick=()=>{try{window.print()}catch(e){}$("#pmsg").textContent="Si la fenêtre d'impression ne s'ouvre pas, utilisez la commande Imprimer de votre navigateur (Ctrl+P ou menu Partager sur téléphone)."};
 }
 
@@ -426,10 +438,11 @@ function vSujets(param){
     <p class="small muted" style="margin-top:10px">Méthode : rédigez votre réponse avant d'ouvrir le corrigé, puis cochez dans la grille les éléments que vous aviez traités. La note obtenue est une autoévaluation indicative ; les jurys ne publient pas de barème officiel.</p>
     <div class="stack" style="margin-top:12px">${s.questions.map((q,i)=>`<div class="panel"><h3 style="margin-top:0">${s.questions.length>1?"Question "+(i+1):"Sujet"}</h3><p>${esc(q.q)}</p>
      <label class="small muted" for="sn${i}">Votre réponse (enregistrée sur cet appareil)</label><textarea id="sn${i}" data-i="${i}" style="min-height:140px">${esc((st.notes||{})[i]||"")}</textarea>
-     <details style="margin-top:10px" ${(st.open||{})[i]?"open":""} data-d="${i}"><summary>Afficher le corrigé et la grille</summary><div class="corr">${q.corr.map(p=>`<p>${esc(p)}</p>`).join("")}</div>
+     <details style="margin-top:10px" ${(st.open||{})[i]?"open":""} data-d="${i}"><summary>Afficher le corrigé et la grille</summary><div class="corr">${q.corr.map(cpara).join("")}</div>
      <div style="margin-top:10px"><div class="small" style="font-weight:600;margin-bottom:6px">Grille : éléments attendus</div>${q.grille.map((g,j)=>`<label class="opt" style="margin-bottom:6px"><input type="checkbox" data-k="${i}-${j}" ${((st.chk||{})[i+"-"+j])?"checked":""}><span class="t">${esc(g[0])}</span><span class="mono small muted" style="margin-left:auto;white-space:nowrap">${fmtN(g[1])} pt</span></label>`).join("")}</div></details></div>`).join("")}</div>
     <div class="panel" style="margin-top:14px"><div class="row" style="justify-content:space-between"><b>Note d'autoévaluation</b><span class="big" id="snote">${fmtN(sujNote(s).n)} / 20</span></div>${meter(Math.round(sujNote(s).n*5))}
-    <div class="row" style="margin-top:10px"><button class="btn" id="sdone">${st.done?"Sujet marqué comme traité":"Marquer comme traité"}</button><button class="btn" id="sreset">Effacer mes réponses et ma grille</button></div></div>`;
+    <div class="row" style="margin-top:10px"><button class="btn" id="sdone">${st.done?"Sujet marqué comme traité":"Marquer comme traité"}</button><button class="btn" id="sreset">Effacer mes réponses et ma grille</button><button class="btn" id="sexp">Exporter le corrigé (Word)</button></div></div>`;
+    $("#sexp").onclick=()=>exportDoc("corrige-"+s.id+"-"+s.titre,s.titre,CONC[s.conc].t+" · "+s.type+(s.duree?" · "+s.duree:""),s.enonce,s.questions);
     app.querySelectorAll("textarea[data-i]").forEach(x=>x.addEventListener("input",()=>save(o=>{o.notes=o.notes||{};o.notes[x.dataset.i]=x.value})));
     app.querySelectorAll("details[data-d]").forEach(d=>d.addEventListener("toggle",()=>save(o=>{o.open=o.open||{};o.open[d.dataset.d]=d.open})));
     app.querySelectorAll("input[data-k]").forEach(x=>x.onchange=()=>{save(o=>{o.chk=o.chk||{};o.chk[x.dataset.k]=x.checked});const n=sujNote(s);$("#snote").textContent=fmtN(n.n)+" / 20";app.querySelector(".panel .bar i").style.width=Math.round(n.n*5)+"%"});
