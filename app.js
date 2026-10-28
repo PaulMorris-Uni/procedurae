@@ -528,13 +528,18 @@ function route(){
   const m=MODULES.find(x=>x.id===v)||(v==="imprimer"?{t:"Imprimer"}:null);
   back.hidden=!m; ttl.textContent=m?m.t:"Atelier procédure civile";
   back.href=(p&&["cours","cas","doctrine","dissert","sujets"].includes(v))?"#"+v:(v==="imprimer"&&p?"#cours/"+p:"#");
-  document.querySelectorAll(".top .act a").forEach(a=>a.classList.toggle("on",a.getAttribute("href")==="#"+v));
+  document.querySelectorAll(".top .act a:not(#themeBtn)").forEach(a=>a.classList.toggle("on",a.getAttribute("href")==="#"+v));
   if(!["cours","imprimer"].includes(v))app.style.removeProperty("--vc");
   (VIEWS[v]||vHome)(p);
   if(!p||v!=="qcm")window.scrollTo(0,0);
 }
 let deferredPrompt=null;
 window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredPrompt=e;const i=$("#inst");if(i){i.hidden=false;$("#instBtn").onclick=()=>{deferredPrompt.prompt();deferredPrompt=null;i.hidden=true}}});
+const TH={auto:"automatique (selon l'appareil)",light:"clair",dark:"sombre"};
+function applyTheme(m){const r=document.documentElement;if(m==="light"||m==="dark")r.setAttribute("data-theme",m);else r.removeAttribute("data-theme");const b=document.getElementById("themeBtn");if(b){b.title="Thème : "+TH[m]+". Toucher pour changer.";b.setAttribute("aria-label",b.title)}}
+applyTheme(store.get("theme","auto"));
+(document.getElementById("themeBtn")||{}).onclick=e=>{e.preventDefault();const o=["auto","light","dark"],c=store.get("theme","auto"),n=o[(o.indexOf(c)+1)%3];store.set("theme",n);applyTheme(n);toast("Thème "+TH[n])};
+function toast(msg){let el=document.getElementById("toast");if(!el){el=document.createElement("div");el.id="toast";el.setAttribute("role","status");document.body.appendChild(el)}el.textContent=msg;el.className="on";clearTimeout(toast.t);toast.t=setTimeout(()=>{el.className=""},1800)}
 window.addEventListener("hashchange",route);
 route();
 if("serviceWorker" in navigator&&location.protocol==="https:"&&!/claude\.ai|claudeusercontent/.test(location.hostname)){try{navigator.serviceWorker.register("sw.js").catch(()=>{})}catch(e){}}
