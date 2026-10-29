@@ -28,7 +28,7 @@ const ICO={
  arrets:SV('<path d="M4 19.5V5a2 2 0 0 1 2-2h14v16H6.5a2.5 2.5 0 0 0 0 5H20"/><circle cx="12" cy="10" r="3.5"/><path d="M12 8.5V10l1 1"/>'),
  imprimer:SV('<path d="M6 9V2h12v7"/><rect x="2" y="9" width="20" height="9" rx="2"/><path d="M6 14h12v8H6z"/>')
 };
-const VCOL={lib:"var(--v-lib)",pc:"var(--v-pc)",mard:"var(--v-mard)",arb:"var(--v-arb)",pce:"var(--v-pce)",cph:"var(--v-cph)",cgr:"var(--v-cgr)",cav:"var(--v-cav)",adm:"var(--v-adm)",pen:"var(--v-pen)"};
+const VCOL={lib:"var(--v-lib)",pc:"var(--v-pc)",mard:"var(--v-mard)",arb:"var(--v-arb)",pce:"var(--v-pce)",cph:"var(--v-cph)",cgr:"var(--v-cgr)",cav:"var(--v-cav)",adm:"var(--v-adm)",pen:"var(--v-pen)",dsg:"var(--v-dsg)"};
 const vcOf=c=>VCOL[(CH.find(x=>x.id===c)||{}).v]||"var(--accent)";
 const tagCh=c=>`<span class="tag" style="--vc:${vcOf(c)}">${esc(chName(c))}</span>`;
 const favs=()=>store.get("fav",{});
@@ -48,7 +48,8 @@ const CONC={
  crfpa:{t:"CRFPA",ch:CH.filter(c=>c.v!=="cph"&&c.v!=="cgr").map(c=>c.id),ref:"Arrêté du 17 octobre 2016 modifié",ep:"Épreuve écrite d'admissibilité de procédure (2 heures, coefficient 2), sous la forme d'une ou plusieurs consultations. La procédure civile est l'épreuve de procédure des candidats ayant choisi la spécialité droit civil, droit des affaires ou droit social ; en droit international et européen et en droit fiscal, le candidat choisit entre procédure civile et procédure administrative. Programme : procédure civile, modes amiables de résolution des différends, arbitrage, procédures civiles d'exécution. Le contenu de procédure civile est concerné, à l'exception du volet de procédure prud'homale, qui ne figure pas au programme de l'épreuve, et de la culture juridique propre au concours de greffier. Le volet de procédure pénale prépare l'épreuve de procédure pénale, réservée aux candidats ayant choisi le droit pénal comme matière de spécialité (programme : procédure pénale et droit de l'exécution des peines). Le volet de droit administratif et l'étude des arrêts préparent les candidats ayant choisi la spécialité droit public ou l'épreuve de procédure administrative."},
  enm:{t:"ENM",ch:PCH.filter(c=>c!=="frais").concat(["m1","m2","m3","m5"],PEN,ADM),ref:"Arrêté du 31 décembre 2008 modifié",ep:"Épreuve écrite d'admissibilité de droit civil et procédure civile : composition ou cas pratique au choix du jury (premier concours), cas pratique (deuxième concours), cas pratique ou questions à réponse courte au choix du candidat (troisième concours). Le programme vise l'action en justice, les actes de procédure, les délais, les principes directeurs et l'influence du droit européen, la preuve, les procédures contentieuse et gracieuse, les effets du jugement, les voies de recours et les modes amiables (médiation et conciliation). L'arbitrage, les procédures civiles d'exécution, les procédures participatives et les frais du procès en sont exclus. Le volet de procédure pénale prépare l'épreuve de droit pénal et procédure pénale (principes généraux et influence du droit européen, action publique, action civile, acteurs, phase préparatoire, jugement et voies de recours). Le volet de droit administratif et l'étude des arrêts servent en outre l'épreuve de droit public et l'option orale de droit administratif du premier concours."},
  go:{t:"Grand oral CRFPA",ch:["l1","l2","l3","l4","l5","l6","l7","l8","k5","k6","k7","k8","d5","d10","n1","n6","n9","n10"],ref:"Arrêté du 17 octobre 2016 modifié, art. 7",ep:"Épreuve d'admission : exposé de quinze minutes, après une préparation d'une heure, sur un sujet relatif à la protection des libertés et des droits fondamentaux, suivi d'un entretien de trente minutes avec le jury ; séance publique ; coefficient 4. Le programme couvre la culture juridique générale, l'origine et les sources, le régime juridique et les principales libertés. Le filtre affiche le volet Grand oral, la culture juridique utile à l'entretien, la police administrative et les référés, les principes directeurs de la procédure pénale, la garde à vue, la détention provisoire et la preuve, ainsi que les arrêts administratifs et pénaux intéressant les libertés."},
- greffier:{t:"Greffier",ch:PCH.concat(["m2","e1"],PRUD,["k1","k2","k3","k4","k9","k10","d2","d3"],PEN),ref:"Arrêté du 29 avril 2016 modifié",ep:"Épreuve écrite d'admissibilité n° 2 (3 heures, coefficient 4) : organisation judiciaire et administrative, puis deux questions de procédure, au choix du candidat : procédure civile et prud'homale, procédure pénale, ou une question de chaque. L'application couvre la procédure civile, y compris la conciliation et l'exécution des jugements, ainsi que la procédure prud'homale et l'organisation du conseil de prud'hommes ; l'organisation administrative et les juridictions administratives sont traitées dans le volet de droit administratif ; le volet de procédure pénale couvre l'action publique et l'action civile, le ministère public, les enquêtes, les alternatives aux poursuites, l'instruction, la CRPC, le JLD, le contrôle judiciaire, la détention provisoire, les mandats, les juridictions de jugement dont la cour d'assises, les mineurs, les voies de recours, l'exécution des peines et la victime ; les auxiliaires de justice ne sont pas traités. Un volet de culture juridique prépare l'entretien de l'épreuve orale d'admission."}
+ greffier:{t:"Greffier",ch:PCH.concat(["m2","e1"],PRUD,["k1","k2","k3","k4","k9","k10","d2","d3"],PEN),ref:"Arrêté du 29 avril 2016 modifié",ep:"Épreuve écrite d'admissibilité n° 2 (3 heures, coefficient 4) : organisation judiciaire et administrative, puis deux questions de procédure, au choix du candidat : procédure civile et prud'homale, procédure pénale, ou une question de chaque. L'application couvre la procédure civile, y compris la conciliation et l'exécution des jugements, ainsi que la procédure prud'homale et l'organisation du conseil de prud'hommes ; l'organisation administrative et les juridictions administratives sont traitées dans le volet de droit administratif ; le volet de procédure pénale couvre l'action publique et l'action civile, le ministère public, les enquêtes, les alternatives aux poursuites, l'instruction, la CRPC, le JLD, le contrôle judiciaire, la détention provisoire, les mandats, les juridictions de jugement dont la cour d'assises, les mineurs, les voies de recours, l'exécution des peines et la victime ; les auxiliaires de justice ne sont pas traités. Un volet de culture juridique prépare l'entretien de l'épreuve orale d'admission."},
+ dsg:{t:"Directeur de greffe",ch:PCH.concat(["m2","e1"],PRUD,PEN,["k1","k2","k3","k9","g1","g2","g3","g4"]),ref:"Arrêté du 29 avril 2016 modifié ; notice du concours, session 2027",ep:"Concours de directeur des services de greffe judiciaires. Écrits : épreuve n° 1, composition sur le monde contemporain ou note de synthèse (externe), note sur dossier administratif (interne), 4 heures, coefficient 4 ; épreuve n° 2, questions à réponse courte de 4 heures, coefficient 4, portant sur la procédure civile et prud'homale, la procédure pénale, l'organisation judiciaire et la gestion des ressources humaines (externe), ou sur la gestion des ressources humaines et, au choix, la procédure civile et prud'homale ou la procédure pénale (interne). Oraux : entretien de 30 minutes, coefficient 5 ; interrogation de 15 minutes sur les finances publiques ou le droit de la fonction publique, coefficient 3. Le filtre affiche les procédures, l'organisation judiciaire et le volet propre au directeur."}
 };
 const conc=()=>{const k=store.get("conc","");return CONC[k]?k:""};
 const inConc=c=>{const k=conc();return !k||!CONC[k].ch||CONC[k].ch.includes(c)};
@@ -76,7 +77,7 @@ const MODULES=[
  {id:"delais",g:"e",t:"Tableau des délais",d:"Durées à compléter, départ et sanction",n:()=>D.delais.length+" délais"},
  {id:"calcul",g:"o",t:"Calculateur de délais",d:"Articles 640 à 643, jours fériés inclus",n:()=>"Outil"},
  {id:"qualif",g:"e",t:"Qualifications",d:"Exception, fin de non recevoir, défense au fond",n:()=>D.qualif.length+" moyens"},
- {id:"entretien",g:"e",t:"Entretien greffier",d:"Oral d'admission chronométré : présentation et questions du jury",n:()=>ALL.entretien.questions.length+" questions"},
+ {id:"entretien",g:"e",t:"Entretien oral",d:"Greffier et directeur des services de greffe : oral chronométré et questions du jury",n:()=>ALL.entretien.questions.length+" questions"},
  {id:"sujets",g:"e",t:"Sujets d'examen",d:"Sujets au format de chaque concours, corrigés détaillés et grille de notation",n:()=>(window.SUJETS||[]).filter(s=>!conc()||s.conc===conc()).length+" sujets"},
  {id:"cas",g:"e",t:"Cas pratiques",d:"Énoncés type examen et corrigés rédigés",n:()=>D.cas.length+" cas"},
  {id:"doctrine",g:"a",t:"Débats doctrinaux",d:"Thèses récentes, controverses et critiques",n:()=>window.DOCTRINE.length+" débats"},
@@ -98,8 +99,8 @@ function vHome(){
   const due=D.qcm.filter(q=>qDue(qs[q.id])).length;
   const GR=[["a","Apprendre"],["e","S'entraîner"],["o","Suivre et chercher"]];
   const VID={pc:"cours",mard:"cours",arb:"cours",pce:"cours"};
-  app.innerHTML=`<section class="cover"><div class="eyebrow">${conc()==="go"?"CRFPA · Grand oral · Libertés et droits fondamentaux":"CRFPA · Grand oral · ENM · Greffier"}</div><h1>Procedurae</h1>
-  <p class="lead">Cours, entraînement et outils pour réviser la procédure civile, la procédure prud'homale et la procédure pénale, avec un volet de droit administratif et l'étude des grands arrêts. Votre progression reste enregistrée sur cet appareil.</p>
+  app.innerHTML=`<section class="cover"><div class="eyebrow">${conc()==="go"?"CRFPA · Grand oral · Libertés et droits fondamentaux":"CRFPA · ENM · Greffier · Directeur des services de greffe"}</div><h1>Procedurae</h1>
+  <p class="lead">Un projet pédagogique gratuit, conçu pour accompagner les étudiants dans la révision des matières de procédure exigées aux examens et concours juridiques : CRFPA, École nationale de la magistrature, greffier et directeur des services de greffe judiciaires. Synthèses de cours, exercices d'entraînement corrigés et outils pratiques, accessibles sans inscription ; votre progression reste enregistrée sur cet appareil.</p>
   <div class="maj">Textes à jour au 28 octobre 2026</div>
   <div class="row" style="margin-top:16px">${[["","Tous"]].concat(Object.keys(CONC).map(k=>[k,CONC[k].t])).map(([k,n])=>`<button class="chip ${conc()===k?"on":""}" data-conc="${k}">${esc(n)}</button>`).join("")}</div>
   ${conc()?`<p class="concinfo">${esc(CONC[conc()].ep)} <span style="opacity:.8">${esc(CONC[conc()].ref)}.</span></p>`:`<p class="concinfo">Choisissez votre concours pour n'afficher que son programme.</p>`}
@@ -409,20 +410,19 @@ function exportDoc(name,titre,meta,enonce,qs){
 
 /* ---------- Simulateur d'entretien greffier ---------- */
 let entT=null,ent=null;
+const entMode=()=>store.get("entmode",conc()==="dsg"?"dsg":"greffier");
 const fmtMS=s=>{s=Math.max(0,Math.round(s));return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")};
 function entDraw(n){const E=ALL.entretien,by={};E.questions.forEach((q,i)=>{(by[q.cat]=by[q.cat]||[]).push(i)});
   const sh=a=>a.map(x=>[Math.random(),x]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
-  const plan=n<=6?{parcours:1,metier:1,institution:1,deonto:1,culture:1,situation:1}:n<=8?{parcours:1,metier:2,institution:1,deonto:1,culture:1,situation:2}:{parcours:2,metier:2,institution:2,deonto:1,culture:1,situation:2};
+  const plan=entMode()==="dsg"?(n<=6?{dsgparcours:1,management:2,dsgsit:2,institution:1}:n<=8?{dsgparcours:1,management:2,dsgsit:2,institution:1,deonto:1,culture:1}:{dsgparcours:2,management:3,dsgsit:3,institution:1,deonto:1}):n<=6?{parcours:1,metier:1,institution:1,deonto:1,culture:1,situation:1}:n<=8?{parcours:1,metier:2,institution:1,deonto:1,culture:1,situation:2}:{parcours:2,metier:2,institution:2,deonto:1,culture:1,situation:2};
   let out=[];Object.keys(plan).forEach(c=>out=out.concat(sh(by[c]||[]).slice(0,plan[c])));return out}
-function vEntretien(param){
-  const E=ALL.entretien,C=E.cats;if(entT){clearInterval(entT);entT=null}
-  const rev=store.get("entrev",{});
-  if(param==="banque"){ttl.textContent="Banque de questions";
-    app.innerHTML=`<h1>Banque de questions</h1><p class="lead">${E.questions.length} questions classées par thème, avec des éléments de réponse à adapter à votre parcours.</p>
-    ${Object.keys(C).map(c=>`<h2 style="margin-top:22px">${esc(C[c])}</h2><div class="stack">${E.questions.map((q,i)=>q.cat!==c?"":`<div class="panel"><b>${esc(q.q)}</b>${rev[i]?` <span class="tag">À revoir</span>`:""}<details style="margin-top:8px"><summary>Éléments de réponse</summary><ul class="small">${q.p.map(x=>`<li>${esc(x)}</li>`).join("")}</ul><div class="ref">${esc(q.r)}</div></details></div>`).join("")}</div>`).join("")}`;return}
-  if(!ent||param!=="go"){
-    const hist=store.get("enthist",[]);
-    app.innerHTML=`<h1>Entretien greffier</h1><p class="lead">Simulation de l'épreuve orale d'admission du concours externe : présentation de cinq minutes, puis questions du jury, dans la limite de vingt cinq minutes.</p>
+function entHead(){const m=entMode();return `<div class="row" style="margin-bottom:10px">${[["greffier","Concours de greffier"],["dsg","Concours de directeur des services de greffe"]].map(([k,n])=>`<button class="chip ${m===k?"on":""}" data-em="${k}">${n}</button>`).join("")}</div>`+(m==="dsg"?`<h1>Entretien : directeur des services de greffe</h1><p class="lead">Simulation de l'épreuve n° 3 d'admission : exposé de cinq minutes au plus, puis échange avec le jury et mises en situation, dans la limite de trente minutes.</p>
+    <div class="panel"><b>Modalités</b><ul class="small" style="margin:8px 0 0">
+    <li>Entretien de 30 minutes au plus, dont 5 minutes au plus d'exposé ; coefficient 5 ; note inférieure à 5 éliminatoire.</li>
+    <li>Concours externe : évaluation des qualités personnelles, du potentiel et du comportement face à des mises en situation, à partir de la fiche individuelle de renseignement.</li>
+    <li>Concours interne : appréciation de l'expérience professionnelle, de l'aptitude aux fonctions, des motivations et des qualités personnelles, à partir du dossier de reconnaissance des acquis de l'expérience professionnelle.</li>
+    <li>L'épreuve n° 4, interrogation de 15 minutes sur les finances publiques ou le droit de la fonction publique, se prépare avec les chapitres du volet « Directeur des services de greffe ».</li></ul>
+    <p class="small muted" style="margin:8px 0 0">Source : notice du concours de directeur des services de greffe judiciaires, session 2027.</p></div>`:`<h1>Entretien greffier</h1><p class="lead">Simulation de l'épreuve orale d'admission du concours externe : présentation de cinq minutes, puis questions du jury, dans la limite de vingt cinq minutes.</p>
     <div class="panel"><b>Modalités</b><ul class="small" style="margin:8px 0 0">
     <li>Entretien de 25 minutes au plus, dont 5 minutes au plus de présentation du parcours et de la motivation, à partir de la fiche individuelle de renseignement ; coefficient 4 ; note inférieure à 5 éliminatoire.</li>
     <li>Le jury évalue les qualités personnelles, le potentiel et le comportement face à une situation concrète, notamment par une mise en situation.</li>
@@ -431,14 +431,24 @@ function vEntretien(param){
     <div class="panel" style="margin-top:12px"><b>Ce que le jury a relevé en 2024</b><ul class="small" style="margin:8px 0 0">
     <li>Missions du greffier et déontologie : majoritairement bien traitées.</li>
     <li>Environnement judiciaire (organisation d'une juridiction, partenaires, directions du ministère) : trop de candidats sans réponse.</li>
-    <li>Points faibles : sécurité informatique, absence de visite d'audience publique, projet professionnel imprécis, difficulté à se positionner dans l'équipe.</li></ul></div>
+    <li>Points faibles : sécurité informatique, absence de visite d'audience publique, projet professionnel imprécis, difficulté à se positionner dans l'équipe.</li></ul></div>`);}
+function vEntretien(param){
+  const E=ALL.entretien,C=E.cats;if(entT){clearInterval(entT);entT=null}
+  const rev=store.get("entrev",{});
+  if(param==="banque"){ttl.textContent="Banque de questions";
+    app.innerHTML=`<h1>Banque de questions</h1><p class="lead">${E.questions.length} questions classées par thème, avec des éléments de réponse à adapter à votre parcours.</p>
+    ${Object.keys(C).map(c=>`<h2 style="margin-top:22px">${esc(C[c])}</h2><div class="stack">${E.questions.map((q,i)=>q.cat!==c?"":`<div class="panel"><b>${esc(q.q)}</b>${rev[i]?` <span class="tag">À revoir</span>`:""}<details style="margin-top:8px"><summary>Éléments de réponse</summary><ul class="small">${q.p.map(x=>`<li>${esc(x)}</li>`).join("")}</ul><div class="ref">${esc(q.r)}</div></details></div>`).join("")}</div>`).join("")}`;return}
+  if(!ent||param!=="go"){
+    const hist=store.get("enthist",[]);
+    app.innerHTML=`${entHead()}
     <div class="panel" style="margin-top:12px"><label class="small muted" for="entplan">Votre plan de présentation (enregistré sur cet appareil)</label><textarea id="entplan" style="min-height:110px" placeholder="Parcours, expériences utiles, motivation, projet">${esc(store.get("entplan",""))}</textarea></div>
     <div class="row" style="margin-top:14px;align-items:center"><span class="small">Nombre de questions :</span>${[6,8,10].map(n=>`<button class="chip ${n===8?"on":""}" data-n="${n}">${n}</button>`).join("")}</div>
     <div class="row" style="margin-top:12px"><button class="btn primary" id="entgo">Lancer l'entretien</button><a class="btn" href="#entretien/banque">Banque de questions</a>${Object.keys(rev).length?`<button class="btn" id="entrv">Revoir mes ${Object.keys(rev).length} questions à revoir</button>`:""}</div>
     ${hist.length?`<p class="small muted" style="margin-top:14px">Dernières simulations : ${hist.slice(-5).reverse().map(h=>`${new Date(h.d).toLocaleDateString("fr-FR")} (${h.ok}/${h.n} à l'aise)`).join(" · ")}</p>`:""}`;
     let n=8;app.querySelectorAll("[data-n]").forEach(b=>b.onclick=()=>{n=+b.dataset.n;app.querySelectorAll("[data-n]").forEach(x=>x.classList.toggle("on",x===b))});
     $("#entplan").addEventListener("input",e=>store.set("entplan",e.target.value));
-    const start=list=>{ent={list,pos:-1,t0:Date.now(),res:{},show:false};location.hash="#entretien/go"};
+    app.querySelectorAll("[data-em]").forEach(b=>b.onclick=()=>{store.set("entmode",b.dataset.em);vEntretien()});
+    const start=list=>{ent={list,pos:-1,t0:Date.now(),res:{},show:false,dur:entMode()==="dsg"?1800:1500};location.hash="#entretien/go"};
     $("#entgo").onclick=()=>start(entDraw(n));
     if($("#entrv"))$("#entrv").onclick=()=>start(Object.keys(rev).map(Number));
     return}
@@ -450,8 +460,8 @@ function vEntretien(param){
       <div class="panel" style="margin-top:14px"><p style="margin:0">Exposez à voix haute, en cinq minutes au plus, votre parcours, vos expériences utiles et votre motivation. Vous ne disposez pas de votre fiche pendant l'épreuve.</p>${store.get("entplan","")?`<details style="margin-top:10px"><summary>Mon plan</summary><p class="small" style="white-space:pre-wrap">${esc(store.get("entplan",""))}</p></details>`:""}</div>
       <div class="row" style="margin-top:14px"><button class="btn primary" id="enext">Terminer la présentation et passer aux questions</button><button class="btn" id="eabort">Abandonner</button></div>`}
     else if(ent.pos<L.length){const i=L[ent.pos],q=E.questions[i];
-      app.innerHTML=`<div class="row" style="justify-content:space-between;align-items:center"><span class="tag">${esc(C[q.cat])} · question ${ent.pos+1} sur ${L.length}</span><span class="big mono" id="eclk">${fmtMS(1500-s)}</span></div>
-      <div class="bar" style="margin-top:10px"><i id="ebar" style="width:${Math.min(100,s/15)}%"></i></div>
+      app.innerHTML=`<div class="row" style="justify-content:space-between;align-items:center"><span class="tag">${esc(C[q.cat])} · question ${ent.pos+1} sur ${L.length}</span><span class="big mono" id="eclk">${fmtMS(ent.dur-s)}</span></div>
+      <div class="bar" style="margin-top:10px"><i id="ebar" style="width:${Math.min(100,s/(ent.dur/100))}%"></i></div>
       <div class="panel" style="margin-top:14px"><p style="font-size:1.1rem;margin:0"><b>${esc(q.q)}</b></p>
       <p class="small muted" style="margin:8px 0 0">Répondez à voix haute, comme devant le jury, avant d'afficher les éléments de réponse.</p>
       <details style="margin-top:10px" ${ent.show?"open":""} id="edet"><summary>Éléments de réponse</summary><ul class="small">${q.p.map(x=>`<li>${esc(x)}</li>`).join("")}</ul><div class="ref">${esc(q.r)}</div></details></div>
@@ -459,7 +469,7 @@ function vEntretien(param){
       app.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{const ok=b.dataset.r==="1";ent.res[i]=ok;const r=store.get("entrev",{});if(ok)delete r[i];else r[i]=1;store.set("entrev",r);ent.pos++;ent.show=false;draw()})}
     else{if(entT){clearInterval(entT);entT=null}const ok=Object.values(ent.res).filter(Boolean).length;
       if(!ent.saved){const h=store.get("enthist",[]);h.push({d:Date.now(),n:L.length,ok,dur:Math.round(s)});store.set("enthist",h.slice(-30));ent.saved=true}
-      app.innerHTML=`<h1>Bilan de l'entretien</h1><div class="stats" style="margin-top:10px"><div><b>${ok}/${L.length}</b><span>Questions maîtrisées</span></div><div><b>${fmtMS(s)}</b><span>Durée totale</span></div><div><b>${s<=1500?"Oui":"Non"}</b><span>Dans les 25 minutes</span></div></div>
+      app.innerHTML=`<h1>Bilan de l'entretien</h1><div class="stats" style="margin-top:10px"><div><b>${ok}/${L.length}</b><span>Questions maîtrisées</span></div><div><b>${fmtMS(s)}</b><span>Durée totale</span></div><div><b>${s<=ent.dur?"Oui":"Non"}</b><span>Dans les ${ent.dur/60} minutes</span></div></div>
       <div class="stack" style="margin-top:14px">${L.map(i=>`<div class="panel"><span class="${ent.res[i]?"v-ok":"v-ko"} small">${ent.res[i]?"À l'aise":"À revoir"}</span><div><b>${esc(E.questions[i].q)}</b></div><details style="margin-top:6px"><summary>Éléments de réponse</summary><ul class="small">${E.questions[i].p.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></details></div>`).join("")}</div>
       <div class="row" style="margin-top:14px"><a class="btn primary" href="#entretien">Nouvel entretien</a><a class="btn" href="#entretien/banque">Banque de questions</a></div>`;return}
     if($("#enext"))$("#enext").onclick=()=>{ent.pos=0;draw()};
@@ -468,7 +478,7 @@ function vEntretien(param){
   draw();
   entT=setInterval(()=>{if(!location.hash.startsWith("#entretien/go")||!ent){clearInterval(entT);entT=null;return}const s=el(),c=$("#eclk"),b=$("#ebar");if(!c)return;
     if(ent.pos===-1){c.textContent=fmtMS(300-s);if(b)b.style.width=Math.min(100,s/3)+"%";if(s>=300)c.classList.add("v-ko")}
-    else{c.textContent=fmtMS(1500-s);if(b)b.style.width=Math.min(100,s/15)+"%";if(s>=1500)c.classList.add("v-ko")}},500);
+    else{c.textContent=fmtMS(ent.dur-s);if(b)b.style.width=Math.min(100,s/(ent.dur/100))+"%";if(s>=ent.dur)c.classList.add("v-ko")}},500);
 }
 
 
