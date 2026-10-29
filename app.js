@@ -28,7 +28,7 @@ const ICO={
  arrets:SV('<path d="M4 19.5V5a2 2 0 0 1 2-2h14v16H6.5a2.5 2.5 0 0 0 0 5H20"/><circle cx="12" cy="10" r="3.5"/><path d="M12 8.5V10l1 1"/>'),
  imprimer:SV('<path d="M6 9V2h12v7"/><rect x="2" y="9" width="20" height="9" rx="2"/><path d="M6 14h12v8H6z"/>')
 };
-const VCOL={lib:"var(--v-lib)",pc:"var(--v-pc)",mard:"var(--v-mard)",arb:"var(--v-arb)",pce:"var(--v-pce)",cph:"var(--v-cph)",cgr:"var(--v-cgr)",cav:"var(--v-cav)",adm:"var(--v-adm)"};
+const VCOL={lib:"var(--v-lib)",pc:"var(--v-pc)",mard:"var(--v-mard)",arb:"var(--v-arb)",pce:"var(--v-pce)",cph:"var(--v-cph)",cgr:"var(--v-cgr)",cav:"var(--v-cav)",adm:"var(--v-adm)",pen:"var(--v-pen)"};
 const vcOf=c=>VCOL[(CH.find(x=>x.id===c)||{}).v]||"var(--accent)";
 const tagCh=c=>`<span class="tag" style="--vc:${vcOf(c)}">${esc(chName(c))}</span>`;
 const favs=()=>store.get("fav",{});
@@ -40,18 +40,19 @@ const norm=s=>String(s).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
    CRFPA : arrêté du 17 octobre 2016 modifié (procédure civile, modes amiables, arbitrage, procédures civiles d'exécution).
    ENM : arrêté du 31 décembre 2008 modifié, épreuve de droit civil et procédure civile (rubriques A à J).
    Greffier : arrêté du 29 avril 2016 modifié, épreuve écrite n° 2, partie procédure civile. */
-const PRUD=["p1","p2","p3","p4","p5","p6","p7","p8","p9"];
+const PRUD=["p1","p2","p3","p4","p5","p6","p7","p8","p9","p10","p11"];
+const PEN=["n1","n2","n3","n4","n5","n6","n7","n8","n9","n10","n11","n12","n13","n14"];
 const ADM=["d1","d2","d3","d4","d5","d6","d7","d8","d9","d10"];
 const PCH=["pd","act","comp","juge","intro","del","def","inst","pre","jug","urg","vro","vre"];
 const CONC={
- crfpa:{t:"CRFPA",ch:CH.filter(c=>c.v!=="cph"&&c.v!=="cgr").map(c=>c.id),ref:"Arrêté du 17 octobre 2016 modifié",ep:"Épreuve écrite d'admissibilité de procédure (2 heures, coefficient 2), sous la forme d'une ou plusieurs consultations. La procédure civile est l'épreuve de procédure des candidats ayant choisi la spécialité droit civil, droit des affaires ou droit social ; en droit international et européen et en droit fiscal, le candidat choisit entre procédure civile et procédure administrative. Programme : procédure civile, modes amiables de résolution des différends, arbitrage, procédures civiles d'exécution. Tout le contenu de l'application est concerné, à l'exception du volet de procédure prud'homale, qui ne figure pas au programme de l'épreuve, et de la culture juridique propre au concours de greffier. Le volet de droit administratif et l'étude des arrêts préparent les candidats ayant choisi la spécialité droit public ou l'épreuve de procédure administrative."},
- enm:{t:"ENM",ch:PCH.filter(c=>c!=="frais").concat(["m1","m2","m3","m5"],ADM),ref:"Arrêté du 31 décembre 2008 modifié",ep:"Épreuve écrite d'admissibilité de droit civil et procédure civile : composition ou cas pratique au choix du jury (premier concours), cas pratique (deuxième concours), cas pratique ou questions à réponse courte au choix du candidat (troisième concours). Le programme vise l'action en justice, les actes de procédure, les délais, les principes directeurs et l'influence du droit européen, la preuve, les procédures contentieuse et gracieuse, les effets du jugement, les voies de recours et les modes amiables (médiation et conciliation). L'arbitrage, les procédures civiles d'exécution, les procédures participatives et les frais du procès en sont exclus. Le volet de droit administratif et l'étude des arrêts servent en outre l'épreuve de droit public et l'option orale de droit administratif du premier concours."},
- go:{t:"Grand oral CRFPA",ch:["l1","l2","l3","l4","l5","l6","l7","l8","k5","k6","k7","k8","d5","d10"],ref:"Arrêté du 17 octobre 2016 modifié, art. 7",ep:"Épreuve d'admission : exposé de quinze minutes, après une préparation d'une heure, sur un sujet relatif à la protection des libertés et des droits fondamentaux, suivi d'un entretien de trente minutes avec le jury ; séance publique ; coefficient 4. Le programme couvre la culture juridique générale, l'origine et les sources, le régime juridique et les principales libertés. Le filtre affiche le volet Grand oral, la culture juridique utile à l'entretien, la police administrative et les référés, ainsi que les arrêts administratifs intéressant les libertés."},
- greffier:{t:"Greffier",ch:PCH.concat(["m2","e1"],PRUD,["k1","k2","k3","k4","k9","k10","d2","d3"]),ref:"Arrêté du 29 avril 2016 modifié",ep:"Épreuve écrite d'admissibilité n° 2 (3 heures, coefficient 4) : organisation judiciaire et administrative, puis, au choix, procédure civile et prud'homale ou procédure pénale. L'application couvre la procédure civile, y compris la conciliation et l'exécution des jugements, ainsi que la procédure prud'homale et l'organisation du conseil de prud'hommes ; l'organisation administrative et les juridictions administratives sont traitées dans le volet de droit administratif ; l'application ne traite ni l'organisation de la cour d'assises et des juridictions des mineurs, ni les auxiliaires de justice, ni la procédure pénale. Un volet de culture juridique prépare l'entretien de l'épreuve orale d'admission."}
+ crfpa:{t:"CRFPA",ch:CH.filter(c=>c.v!=="cph"&&c.v!=="cgr").map(c=>c.id),ref:"Arrêté du 17 octobre 2016 modifié",ep:"Épreuve écrite d'admissibilité de procédure (2 heures, coefficient 2), sous la forme d'une ou plusieurs consultations. La procédure civile est l'épreuve de procédure des candidats ayant choisi la spécialité droit civil, droit des affaires ou droit social ; en droit international et européen et en droit fiscal, le candidat choisit entre procédure civile et procédure administrative. Programme : procédure civile, modes amiables de résolution des différends, arbitrage, procédures civiles d'exécution. Le contenu de procédure civile est concerné, à l'exception du volet de procédure prud'homale, qui ne figure pas au programme de l'épreuve, et de la culture juridique propre au concours de greffier. Le volet de procédure pénale prépare l'épreuve de procédure pénale, réservée aux candidats ayant choisi le droit pénal comme matière de spécialité (programme : procédure pénale et droit de l'exécution des peines). Le volet de droit administratif et l'étude des arrêts préparent les candidats ayant choisi la spécialité droit public ou l'épreuve de procédure administrative."},
+ enm:{t:"ENM",ch:PCH.filter(c=>c!=="frais").concat(["m1","m2","m3","m5"],PEN,ADM),ref:"Arrêté du 31 décembre 2008 modifié",ep:"Épreuve écrite d'admissibilité de droit civil et procédure civile : composition ou cas pratique au choix du jury (premier concours), cas pratique (deuxième concours), cas pratique ou questions à réponse courte au choix du candidat (troisième concours). Le programme vise l'action en justice, les actes de procédure, les délais, les principes directeurs et l'influence du droit européen, la preuve, les procédures contentieuse et gracieuse, les effets du jugement, les voies de recours et les modes amiables (médiation et conciliation). L'arbitrage, les procédures civiles d'exécution, les procédures participatives et les frais du procès en sont exclus. Le volet de procédure pénale prépare l'épreuve de droit pénal et procédure pénale (principes généraux et influence du droit européen, action publique, action civile, acteurs, phase préparatoire, jugement et voies de recours). Le volet de droit administratif et l'étude des arrêts servent en outre l'épreuve de droit public et l'option orale de droit administratif du premier concours."},
+ go:{t:"Grand oral CRFPA",ch:["l1","l2","l3","l4","l5","l6","l7","l8","k5","k6","k7","k8","d5","d10","n1","n6","n9","n10"],ref:"Arrêté du 17 octobre 2016 modifié, art. 7",ep:"Épreuve d'admission : exposé de quinze minutes, après une préparation d'une heure, sur un sujet relatif à la protection des libertés et des droits fondamentaux, suivi d'un entretien de trente minutes avec le jury ; séance publique ; coefficient 4. Le programme couvre la culture juridique générale, l'origine et les sources, le régime juridique et les principales libertés. Le filtre affiche le volet Grand oral, la culture juridique utile à l'entretien, la police administrative et les référés, les principes directeurs de la procédure pénale, la garde à vue, la détention provisoire et la preuve, ainsi que les arrêts administratifs et pénaux intéressant les libertés."},
+ greffier:{t:"Greffier",ch:PCH.concat(["m2","e1"],PRUD,["k1","k2","k3","k4","k9","k10","d2","d3"],PEN),ref:"Arrêté du 29 avril 2016 modifié",ep:"Épreuve écrite d'admissibilité n° 2 (3 heures, coefficient 4) : organisation judiciaire et administrative, puis deux questions de procédure, au choix du candidat : procédure civile et prud'homale, procédure pénale, ou une question de chaque. L'application couvre la procédure civile, y compris la conciliation et l'exécution des jugements, ainsi que la procédure prud'homale et l'organisation du conseil de prud'hommes ; l'organisation administrative et les juridictions administratives sont traitées dans le volet de droit administratif ; le volet de procédure pénale couvre l'action publique et l'action civile, le ministère public, les enquêtes, les alternatives aux poursuites, l'instruction, la CRPC, le JLD, le contrôle judiciaire, la détention provisoire, les mandats, les juridictions de jugement dont la cour d'assises, les mineurs, les voies de recours, l'exécution des peines et la victime ; les auxiliaires de justice ne sont pas traités. Un volet de culture juridique prépare l'entretien de l'épreuve orale d'admission."}
 };
 const conc=()=>{const k=store.get("conc","");return CONC[k]?k:""};
 const inConc=c=>{const k=conc();return !k||!CONC[k].ch||CONC[k].ch.includes(c)};
-const delaiCh=x=>{const t=x.t;if(/CPCE/.test(t))return /L\. 111-4/.test(t)?"e1":/R\. 511/.test(t)?"e3":/R\. 211/.test(t)?"e4":"e5";if(/1343-5/.test(t))return "e1";if(/1534/.test(t))return "m2";if(/2238/.test(t))return "m1";if(/1463/.test(t))return "a2";if(/1494|1519/.test(t))return "a3";if(/C\. trav/.test(t))return /R\. 1461|R\. 1455-11/.test(t)?"p8":/4624/.test(t)?"p7":/L\. 1245-2|L\. 1451-1|L\. 1454-1-1|R\. 1454-12/.test(t)?"p5":/1454/.test(t)?"p6":"p3";return "del"};
+const delaiCh=x=>{if(x.c)return x.c;const t=x.t;if(/CPCE/.test(t))return /L\. 111-4/.test(t)?"e1":/R\. 511/.test(t)?"e3":/R\. 211/.test(t)?"e4":"e5";if(/1343-5/.test(t))return "e1";if(/1534/.test(t))return "m2";if(/2238/.test(t))return "m1";if(/1463/.test(t))return "a2";if(/1494|1519/.test(t))return "a3";if(/C\. trav/.test(t))return /R\. 1461|R\. 1455-11/.test(t)?"p8":/4624/.test(t)?"p7":/L\. 1245-2|L\. 1451-1|L\. 1454-1-1|R\. 1454-12/.test(t)?"p5":/1454/.test(t)?"p6":"p3";return "del"};
 function applyConc(){D.qcm=ALL.qcm.filter(q=>inConc(q.c));D.fiches=ALL.fiches.filter(x=>inConc(x.c));D.juris=ALL.juris.filter(x=>inConc(x.c));D.cas=ALL.cas;D.delais=ALL.delais;D.qualif=ALL.qualif}
 applyConc();
 const concNote=()=>{const k=conc();return k?`<p class="small muted" style="margin-top:-4px">Filtre actif : programme ${esc(CONC[k].t)} · <a href="#" style="color:var(--accent)">modifier depuis l'accueil</a></p>`:""};
@@ -70,7 +71,7 @@ const MODULES=[
  {id:"examen",g:"e",t:"Examen blanc",d:"Série chronométrée notée sur 20, correction à la fin",n:()=>"Épreuve"},
  {id:"qcm",g:"e",t:"QCM",d:"Cinq propositions, une ou plusieurs exactes",n:()=>D.qcm.length+" questions"},
  {id:"fiches",g:"a",t:"Fiches mémoire",d:"Répétition espacée en cinq boîtes",n:()=>D.fiches.length+" fiches"},
- {id:"arrets",g:"a",t:"Étude des arrêts",d:"Grands arrêts administratifs : date, juridiction, portée",n:()=>arrList().length+" arrêts"},
+ {id:"arrets",g:"a",t:"Étude des arrêts",d:"Grands arrêts administratifs et pénaux : date, juridiction, portée",n:()=>arrList().length+" arrêts"},
  {id:"juris",g:"a",t:"Jurisprudence",d:"Grands arrêts : solution et portée",n:()=>D.juris.length+" arrêts"},
  {id:"delais",g:"e",t:"Tableau des délais",d:"Durées à compléter, départ et sanction",n:()=>D.delais.length+" délais"},
  {id:"calcul",g:"o",t:"Calculateur de délais",d:"Articles 640 à 643, jours fériés inclus",n:()=>"Outil"},
@@ -98,7 +99,7 @@ function vHome(){
   const GR=[["a","Apprendre"],["e","S'entraîner"],["o","Suivre et chercher"]];
   const VID={pc:"cours",mard:"cours",arb:"cours",pce:"cours"};
   app.innerHTML=`<section class="cover"><div class="eyebrow">${conc()==="go"?"CRFPA · Grand oral · Libertés et droits fondamentaux":"CRFPA · Grand oral · ENM · Greffier"}</div><h1>Procedurae</h1>
-  <p class="lead">Cours, entraînement et outils pour réviser la procédure civile et la procédure prud'homale, avec un volet de droit administratif et l'étude des grands arrêts. Votre progression reste enregistrée sur cet appareil.</p>
+  <p class="lead">Cours, entraînement et outils pour réviser la procédure civile, la procédure prud'homale et la procédure pénale, avec un volet de droit administratif et l'étude des grands arrêts. Votre progression reste enregistrée sur cet appareil.</p>
   <div class="maj">Textes à jour au 28 octobre 2026</div>
   <div class="row" style="margin-top:16px">${[["","Tous"]].concat(Object.keys(CONC).map(k=>[k,CONC[k].t])).map(([k,n])=>`<button class="chip ${conc()===k?"on":""}" data-conc="${k}">${esc(n)}</button>`).join("")}</div>
   ${conc()?`<p class="concinfo">${esc(CONC[conc()].ep)} <span style="opacity:.8">${esc(CONC[conc()].ref)}.</span></p>`:`<p class="concinfo">Choisissez votre concours pour n'afficher que son programme.</p>`}
@@ -209,20 +210,21 @@ function vJuris(param){
 
 /* ---------- Étude des arrêts (droit administratif) ---------- */
 const ARR=ALL.arrets||{themes:{},list:[]};
-const TH2CH={intro:"d1",orga:"d2",juridictions:"d3",sp:"d4",police:"d5",actes:"d6",contrats:"d7",legalite:"d8",resp:"d9",contentieux:"d10"};
-const JURN={"TC":"Tribunal des conflits","CE":"Conseil d'État","CE Ass.":"Conseil d'État, Assemblée","CE Sect.":"Conseil d'État, Section","CE ord.":"Conseil d'État, ordonnance de référé","CE avis":"Conseil d'État, avis","Cons. const.":"Conseil constitutionnel"};
+const TH2CH={...((ALL.arrets||{}).th2ch||{}),intro:"d1",orga:"d2",juridictions:"d3",sp:"d4",police:"d5",actes:"d6",contrats:"d7",legalite:"d8",resp:"d9",contentieux:"d10"};
+const JURN={"TC":"Tribunal des conflits","CE":"Conseil d'État","CE Ass.":"Conseil d'État, Assemblée","CE Sect.":"Conseil d'État, Section","CE ord.":"Conseil d'État, ordonnance de référé","CE avis":"Conseil d'État, avis","Cons. const.":"Conseil constitutionnel","Cass. crim.":"Cour de cassation, chambre criminelle","Ass. plén.":"Cour de cassation, Assemblée plénière","CEDH":"Cour européenne des droits de l'homme","CEDH gr. ch.":"Cour européenne des droits de l'homme, grande chambre","CJUE gr. ch.":"Cour de justice de l'Union européenne, grande chambre"};
 const fmtA=d=>{const [y,m,j]=d.split("-").map(Number);return (j===1?"1er":j)+" "+MOIS[m-1]+" "+y};
 const arrRef=a=>a.jur+", "+fmtA(a.d);
 const arrOk=a=>{const k=conc();if(!k)return true;if(k==="go")return a.lib;return inConc(TH2CH[a.th])};
-const arrList=()=>ARR.list.filter(arrOk);
+const arrList=()=>ARR.list.filter(a=>arrOk(a)&&(!arF.m||a.m===arF.m));
+const MAT={adm:"Droit administratif",pen:"Procédure pénale"};
 const aBox=id=>(store.get("arr",{})[id]||{}).b||0;
 const aDue=id=>{const r=store.get("arr",{})[id];return !r||(Date.now()-r.t)>=QINT[r.b-1]*864e5};
 function recordA(id,ok){const r=store.get("arr",{}),pr=r[id]||{};r[id]={b:ok?Math.min(5,(pr.b||0)+1):1,t:Date.now(),n:(pr.n||0)+1,k:(pr.k||0)+(ok?1:0)};store.set("arr",r);logAct()}
 const AMODES={date:"Nom → date et juridiction",portee:"Nom → portée",nom:"Solution → nom de l'arrêt",chrono:"Date → nom de l'arrêt",mix:"Mélange des quatre"};
-let arTab="liste",arF={q:"",th:"",jur:"",lib:false,tri:"chrono",hide:false},aq=null,ac={cur:null,shown:false};
+let arTab="liste",arF={q:"",th:"",jur:"",m:"",lib:false,tri:"chrono",hide:false},aq=null,ac={cur:null,shown:false};
 function arrDistract(a,pool,how,label){
   // how : "date" (années proches) ou "theme" (même thème d'abord)
-  let c=pool.filter(x=>x.id!==a.id);
+  let c=pool.filter(x=>x.id!==a.id&&x.m===a.m);if(c.length<3)c=pool.filter(x=>x.id!==a.id);
   if(how==="date")c=c.sort((x,y)=>Math.abs(+x.d.slice(0,4)-+a.d.slice(0,4))-Math.abs(+y.d.slice(0,4)-+a.d.slice(0,4))).slice(0,10);
   else c=shuffle(c.filter(x=>x.th===a.th)).concat(shuffle(c.filter(x=>x.th!==a.th)));
   const out=[],seen=new Set([label(a)]);for(const x of (how==="date"?shuffle(c):c)){const l=label(x);if(!seen.has(l)){seen.add(l);out.push(x)}if(out.length===3)break}return out;
@@ -244,10 +246,10 @@ function arrCard(a,open){
 function vArrets(param){
   const all=arrList(),st=store.get("arr",{});
   const seen=all.filter(a=>st[a.id]).length,known=all.filter(a=>(st[a.id]||{}).b>=4).length,due=all.filter(a=>aDue(a.id)).length;
-  const head=`<h1>Étude des arrêts</h1><p class="lead">Les grands arrêts du droit administratif : retrouver la juridiction, la date, la solution et la portée à partir du seul nom, et inversement. Un arrêt réussi monte d'une boîte ; un arrêt manqué revient en boîte 1.</p>${concNote()}
+  const head=`<h1>Étude des arrêts</h1><p class="lead">Les grands arrêts du droit administratif et de la procédure pénale : retrouver la juridiction, la date, la solution et la portée à partir du seul nom, et inversement. Un arrêt réussi monte d'une boîte ; un arrêt manqué revient en boîte 1.</p>${concNote()}
   <div class="boxes" style="grid-template-columns:repeat(4,1fr)"><div><b>${all.length}</b>Arrêts</div><div><b>${seen}</b>Déjà vus</div><div><b>${known}</b>Maîtrisés</div><div><b>${due}</b>À voir ou revoir</div></div>
-  <div class="row" style="margin:14px 0 12px">${[["liste","Liste et frise"],["quiz","Quiz"],["cartes","Cartes mémoire"]].map(([k,n])=>`<button class="chip ${arTab===k?"on":""}" data-at="${k}">${n}</button>`).join("")}</div>`;
-  const bindTabs=()=>app.querySelectorAll("[data-at]").forEach(b=>b.onclick=()=>{arTab=b.dataset.at;if(param)location.hash="arrets";else vArrets()});
+  <div class="row" style="margin:14px 0 4px">${[["","Toutes matières"],["adm","Droit administratif"],["pen","Procédure pénale"]].map(([k,n])=>`<button class="chip ${arF.m===k?"on":""}" data-am="${k}">${n}</button>`).join("")}</div><div class="row" style="margin:6px 0 12px">${[["liste","Liste et frise"],["quiz","Quiz"],["cartes","Cartes mémoire"]].map(([k,n])=>`<button class="chip ${arTab===k?"on":""}" data-at="${k}">${n}</button>`).join("")}</div>`;
+  const bindTabs=()=>{app.querySelectorAll("[data-at]").forEach(b=>b.onclick=()=>{arTab=b.dataset.at;if(param)location.hash="arrets";else vArrets()});app.querySelectorAll("[data-am]").forEach(b=>b.onclick=()=>{arF.m=b.dataset.am;arF.th="";aq=null;ac={cur:null,shown:false};if(param)location.hash="arrets";else vArrets()})};
   if(param){const a=ARR.list.find(x=>x.id===param);if(a){ttl.textContent=a.nom;app.style.setProperty("--vc",vcOf(TH2CH[a.th]));app.innerHTML=head+arrCard(a,true)+`<div class="row" style="margin-top:12px"><a class="btn" href="#arrets">Tous les arrêts</a><a class="btn" href="#cours/${TH2CH[a.th]}">Chapitre : ${esc(chName(TH2CH[a.th]))}</a></div>`;bindTabs();return}}
   if(arTab==="liste"){
     const q=norm(arF.q).split(/\s+/).filter(Boolean);
@@ -256,12 +258,12 @@ function vArrets(param){
     let lastKey="";
     const body=L.map(a=>{const k=arF.tri==="theme"?ARR.themes[a.th]:(Math.floor(+a.d.slice(0,4)/10)*10)+"";const h=k!==lastKey?`<h3>${esc(arF.tri==="theme"?k:"Années "+k)}</h3>`:"";lastKey=k;return h+arrCard(a)}).join("");
     app.innerHTML=head+`<div class="searchbox">${ICO.recherche}<input type="search" id="aq" placeholder="Nom, mot clé ou année : Morsang, dignité, 1995" value="${esc(arF.q)}" aria-label="Rechercher un arrêt" autocomplete="off"></div>
-    <div class="row" style="margin:10px 0 12px"><select id="ath" aria-label="Thème"><option value="">Tous les thèmes</option>${Object.entries(ARR.themes).map(([k,v])=>`<option value="${k}" ${arF.th===k?"selected":""}>${esc(v)}</option>`).join("")}</select>
-    <select id="ajur" aria-label="Juridiction"><option value="">Toutes juridictions</option>${[["CE","Conseil d'État"],["TC","Tribunal des conflits"],["Cons. const.","Conseil constitutionnel"]].map(([k,v])=>`<option value="${k}" ${arF.jur===k?"selected":""}>${v}</option>`).join("")}</select>
+    <div class="row" style="margin:10px 0 12px"><select id="ath" aria-label="Thème"><option value="">Tous les thèmes</option>${Object.entries(ARR.themes).filter(([k])=>all.some(a=>a.th===k)).map(([k,v])=>`<option value="${k}" ${arF.th===k?"selected":""}>${esc(v)}</option>`).join("")}</select>
+    <select id="ajur" aria-label="Juridiction"><option value="">Toutes juridictions</option>${[["CE","Conseil d'État"],["TC","Tribunal des conflits"],["Cons. const.","Conseil constitutionnel"],["Cass.","Cour de cassation"],["Ass. plén.","Assemblée plénière"],["CEDH","Cour européenne des droits de l'homme"],["CJUE","Cour de justice de l'Union"]].map(([k,v])=>`<option value="${k}" ${arF.jur===k?"selected":""}>${v}</option>`).join("")}</select>
     <select id="atri" aria-label="Classement"><option value="chrono" ${arF.tri==="chrono"?"selected":""}>Frise chronologique</option><option value="theme" ${arF.tri==="theme"?"selected":""}>Par thème</option></select>
     <label class="row small"><input type="checkbox" id="alib" ${arF.lib?"checked":""}> Libertés fondamentales</label><label class="row small"><input type="checkbox" id="ahide" ${arF.hide?"checked":""}> Masquer les solutions</label></div>
     <p class="small muted">${L.length} arrêt${L.length>1?"s":""}</p><div class="stack" id="alist">${body||`<div class="panel"><p class="muted" style="margin:0">Aucun arrêt ne correspond.</p></div>`}</div>
-    <p class="note">Dates recoupées entre deux tables académiques des grands arrêts et, pour les décisions récentes, avec leur numéro de requête. Pensez à vérifier sur Légifrance ou sur le site du Conseil d'État avant de citer une décision dans une copie.</p>`;
+    <p class="note">Dates recoupées entre deux tables académiques des grands arrêts administratifs et, pour les décisions récentes et les décisions pénales, avec leur numéro de requête ou de pourvoi. Pensez à vérifier sur Légifrance ou sur le site du Conseil d'État avant de citer une décision dans une copie.</p>`;
     bindTabs();
     const upd=(k,v)=>{arF[k]=v;vArrets();if(k==="q"){const i=$("#aq");i.focus();i.setSelectionRange(i.value.length,i.value.length)}};
     $("#aq").addEventListener("input",e=>upd("q",e.target.value));
@@ -273,7 +275,7 @@ function vArrets(param){
     if(!aq){
       app.innerHTML=head+`<div class="panel"><div class="f2">
       <div class="field"><label for="am">Exercice</label><select id="am">${Object.entries(AMODES).map(([k,v])=>`<option value="${k}">${esc(v)}</option>`).join("")}</select></div>
-      <div class="field"><label for="ath2">Thème</label><select id="ath2"><option value="">Tous les thèmes</option>${Object.entries(ARR.themes).map(([k,v])=>`<option value="${k}">${esc(v)}</option>`).join("")}</select></div>
+      <div class="field"><label for="ath2">Thème</label><select id="ath2"><option value="">Tous les thèmes</option>${Object.entries(ARR.themes).filter(([k])=>all.some(a=>a.th===k)).map(([k,v])=>`<option value="${k}">${esc(v)}</option>`).join("")}</select></div>
       <div class="field"><label for="ap">Arrêts proposés</label><select id="ap"><option value="rev">À revoir en priorité (${due})</option><option value="all">Tous, au hasard</option><option value="new">Jamais vus</option></select></div>
       <div class="field"><label for="an">Nombre de questions</label><select id="an"><option>10</option><option selected>20</option><option>40</option></select></div></div>
       <div class="row" style="margin-top:14px"><button class="btn primary" id="ago">Commencer</button><span class="small muted" id="ainfo"></span></div></div>`;
@@ -313,7 +315,7 @@ function vArrets(param){
 }
 
 /* ---------- Tableau des délais ---------- */
-const DUR=["15 jours","1 mois","2 mois","3 mois","5 mois","6 mois","1 an","2 ans","3 ans","5 ans","10 ans","30 ans"];
+const DUR=["24 heures","8 jours","10 jours","15 jours","1 mois","2 mois","3 mois","4 mois","5 mois","6 mois","1 an","2 ans","3 ans","5 ans","6 ans","10 ans","20 ans","30 ans"];
 let dChecked=false;
 function vDelais(){
   const ans=store.get("dans",{});
