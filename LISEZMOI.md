@@ -1,4 +1,4 @@
-# Atelier de procédure : mise en ligne
+# Procedurae : mise en ligne
 
 Ce dossier contient l'application complète. Pour la mettre en ligne gratuitement sur GitHub Pages et l'installer sur un téléphone Android, suivez ces étapes depuis un ordinateur.
 

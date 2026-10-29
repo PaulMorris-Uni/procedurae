@@ -25,9 +25,10 @@ const ICO={
  dissert:SV('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>'),
  recherche:SV('<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>'),
  favoris:SV('<path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.2l1.1-6.2L3 9.6l6.2-.9z"/>'),
+ arrets:SV('<path d="M4 19.5V5a2 2 0 0 1 2-2h14v16H6.5a2.5 2.5 0 0 0 0 5H20"/><circle cx="12" cy="10" r="3.5"/><path d="M12 8.5V10l1 1"/>'),
  imprimer:SV('<path d="M6 9V2h12v7"/><rect x="2" y="9" width="20" height="9" rx="2"/><path d="M6 14h12v8H6z"/>')
 };
-const VCOL={lib:"var(--v-lib)",pc:"var(--v-pc)",mard:"var(--v-mard)",arb:"var(--v-arb)",pce:"var(--v-pce)",cph:"var(--v-cph)",cgr:"var(--v-cgr)",cav:"var(--v-cav)"};
+const VCOL={lib:"var(--v-lib)",pc:"var(--v-pc)",mard:"var(--v-mard)",arb:"var(--v-arb)",pce:"var(--v-pce)",cph:"var(--v-cph)",cgr:"var(--v-cgr)",cav:"var(--v-cav)",adm:"var(--v-adm)"};
 const vcOf=c=>VCOL[(CH.find(x=>x.id===c)||{}).v]||"var(--accent)";
 const tagCh=c=>`<span class="tag" style="--vc:${vcOf(c)}">${esc(chName(c))}</span>`;
 const favs=()=>store.get("fav",{});
@@ -40,12 +41,13 @@ const norm=s=>String(s).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
    ENM : arrêté du 31 décembre 2008 modifié, épreuve de droit civil et procédure civile (rubriques A à J).
    Greffier : arrêté du 29 avril 2016 modifié, épreuve écrite n° 2, partie procédure civile. */
 const PRUD=["p1","p2","p3","p4","p5","p6","p7","p8","p9"];
+const ADM=["d1","d2","d3","d4","d5","d6","d7","d8","d9","d10"];
 const PCH=["pd","act","comp","juge","intro","del","def","inst","pre","jug","urg","vro","vre"];
 const CONC={
- crfpa:{t:"CRFPA",ch:CH.filter(c=>c.v!=="cph"&&c.v!=="cgr").map(c=>c.id),ref:"Arrêté du 17 octobre 2016 modifié",ep:"Épreuve écrite d'admissibilité de procédure (2 heures, coefficient 2), sous la forme d'une ou plusieurs consultations. La procédure civile est l'épreuve de procédure des candidats ayant choisi la spécialité droit civil, droit des affaires ou droit social ; en droit international et européen et en droit fiscal, le candidat choisit entre procédure civile et procédure administrative. Programme : procédure civile, modes amiables de résolution des différends, arbitrage, procédures civiles d'exécution. Tout le contenu de l'application est concerné, à l'exception du volet de procédure prud'homale, qui ne figure pas au programme de l'épreuve, et de la culture juridique propre au concours de greffier."},
- enm:{t:"ENM",ch:PCH.filter(c=>c!=="frais").concat(["m1","m2","m3","m5"]),ref:"Arrêté du 31 décembre 2008 modifié",ep:"Épreuve écrite d'admissibilité de droit civil et procédure civile : composition ou cas pratique au choix du jury (premier concours), cas pratique (deuxième concours), cas pratique ou questions à réponse courte au choix du candidat (troisième concours). Le programme vise l'action en justice, les actes de procédure, les délais, les principes directeurs et l'influence du droit européen, la preuve, les procédures contentieuse et gracieuse, les effets du jugement, les voies de recours et les modes amiables (médiation et conciliation). L'arbitrage, les procédures civiles d'exécution, les procédures participatives et les frais du procès en sont exclus."},
- go:{t:"Grand oral CRFPA",ch:["l1","l2","l3","l4","l5","l6","l7","l8","k5","k6","k7","k8"],ref:"Arrêté du 17 octobre 2016 modifié, art. 7",ep:"Épreuve d'admission : exposé de quinze minutes, après une préparation d'une heure, sur un sujet relatif à la protection des libertés et des droits fondamentaux, suivi d'un entretien de trente minutes avec le jury ; séance publique ; coefficient 4. Le programme couvre la culture juridique générale, l'origine et les sources, le régime juridique et les principales libertés. Le filtre affiche le volet Grand oral et la culture juridique utile à l'entretien."},
- greffier:{t:"Greffier",ch:PCH.concat(["m2","e1"],PRUD,["k1","k2","k3","k4","k9","k10"]),ref:"Arrêté du 29 avril 2016 modifié",ep:"Épreuve écrite d'admissibilité n° 2 (3 heures, coefficient 4) : organisation judiciaire et administrative, puis, au choix, procédure civile et prud'homale ou procédure pénale. L'application couvre la procédure civile, y compris la conciliation et l'exécution des jugements, ainsi que la procédure prud'homale et l'organisation du conseil de prud'hommes ; elle ne traite ni l'organisation de la cour d'assises, des juridictions des mineurs et de l'ordre administratif, ni les auxiliaires de justice, ni la procédure pénale. Un volet de culture juridique prépare l'entretien de l'épreuve orale d'admission."}
+ crfpa:{t:"CRFPA",ch:CH.filter(c=>c.v!=="cph"&&c.v!=="cgr").map(c=>c.id),ref:"Arrêté du 17 octobre 2016 modifié",ep:"Épreuve écrite d'admissibilité de procédure (2 heures, coefficient 2), sous la forme d'une ou plusieurs consultations. La procédure civile est l'épreuve de procédure des candidats ayant choisi la spécialité droit civil, droit des affaires ou droit social ; en droit international et européen et en droit fiscal, le candidat choisit entre procédure civile et procédure administrative. Programme : procédure civile, modes amiables de résolution des différends, arbitrage, procédures civiles d'exécution. Tout le contenu de l'application est concerné, à l'exception du volet de procédure prud'homale, qui ne figure pas au programme de l'épreuve, et de la culture juridique propre au concours de greffier. Le volet de droit administratif et l'étude des arrêts préparent les candidats ayant choisi la spécialité droit public ou l'épreuve de procédure administrative."},
+ enm:{t:"ENM",ch:PCH.filter(c=>c!=="frais").concat(["m1","m2","m3","m5"],ADM),ref:"Arrêté du 31 décembre 2008 modifié",ep:"Épreuve écrite d'admissibilité de droit civil et procédure civile : composition ou cas pratique au choix du jury (premier concours), cas pratique (deuxième concours), cas pratique ou questions à réponse courte au choix du candidat (troisième concours). Le programme vise l'action en justice, les actes de procédure, les délais, les principes directeurs et l'influence du droit européen, la preuve, les procédures contentieuse et gracieuse, les effets du jugement, les voies de recours et les modes amiables (médiation et conciliation). L'arbitrage, les procédures civiles d'exécution, les procédures participatives et les frais du procès en sont exclus. Le volet de droit administratif et l'étude des arrêts servent en outre l'épreuve de droit public et l'option orale de droit administratif du premier concours."},
+ go:{t:"Grand oral CRFPA",ch:["l1","l2","l3","l4","l5","l6","l7","l8","k5","k6","k7","k8","d5","d10"],ref:"Arrêté du 17 octobre 2016 modifié, art. 7",ep:"Épreuve d'admission : exposé de quinze minutes, après une préparation d'une heure, sur un sujet relatif à la protection des libertés et des droits fondamentaux, suivi d'un entretien de trente minutes avec le jury ; séance publique ; coefficient 4. Le programme couvre la culture juridique générale, l'origine et les sources, le régime juridique et les principales libertés. Le filtre affiche le volet Grand oral, la culture juridique utile à l'entretien, la police administrative et les référés, ainsi que les arrêts administratifs intéressant les libertés."},
+ greffier:{t:"Greffier",ch:PCH.concat(["m2","e1"],PRUD,["k1","k2","k3","k4","k9","k10","d2","d3"]),ref:"Arrêté du 29 avril 2016 modifié",ep:"Épreuve écrite d'admissibilité n° 2 (3 heures, coefficient 4) : organisation judiciaire et administrative, puis, au choix, procédure civile et prud'homale ou procédure pénale. L'application couvre la procédure civile, y compris la conciliation et l'exécution des jugements, ainsi que la procédure prud'homale et l'organisation du conseil de prud'hommes ; l'organisation administrative et les juridictions administratives sont traitées dans le volet de droit administratif ; l'application ne traite ni l'organisation de la cour d'assises et des juridictions des mineurs, ni les auxiliaires de justice, ni la procédure pénale. Un volet de culture juridique prépare l'entretien de l'épreuve orale d'admission."}
 };
 const conc=()=>{const k=store.get("conc","");return CONC[k]?k:""};
 const inConc=c=>{const k=conc();return !k||!CONC[k].ch||CONC[k].ch.includes(c)};
@@ -68,6 +70,7 @@ const MODULES=[
  {id:"examen",g:"e",t:"Examen blanc",d:"Série chronométrée notée sur 20, correction à la fin",n:()=>"Épreuve"},
  {id:"qcm",g:"e",t:"QCM",d:"Cinq propositions, une ou plusieurs exactes",n:()=>D.qcm.length+" questions"},
  {id:"fiches",g:"a",t:"Fiches mémoire",d:"Répétition espacée en cinq boîtes",n:()=>D.fiches.length+" fiches"},
+ {id:"arrets",g:"a",t:"Étude des arrêts",d:"Grands arrêts administratifs : date, juridiction, portée",n:()=>arrList().length+" arrêts"},
  {id:"juris",g:"a",t:"Jurisprudence",d:"Grands arrêts : solution et portée",n:()=>D.juris.length+" arrêts"},
  {id:"delais",g:"e",t:"Tableau des délais",d:"Durées à compléter, départ et sanction",n:()=>D.delais.length+" délais"},
  {id:"calcul",g:"o",t:"Calculateur de délais",d:"Articles 640 à 643, jours fériés inclus",n:()=>"Outil"},
@@ -94,8 +97,8 @@ function vHome(){
   const due=D.qcm.filter(q=>qDue(qs[q.id])).length;
   const GR=[["a","Apprendre"],["e","S'entraîner"],["o","Suivre et chercher"]];
   const VID={pc:"cours",mard:"cours",arb:"cours",pce:"cours"};
-  app.innerHTML=`<section class="cover"><div class="eyebrow">${conc()==="go"?"CRFPA · Grand oral · Libertés et droits fondamentaux":"CRFPA · Grand oral · ENM · Greffier"}</div><h1>Atelier de procédure</h1>
-  <p class="lead">Cours, entraînement et outils pour réviser la procédure civile et la procédure prud'homale. Votre progression reste enregistrée sur cet appareil.</p>
+  app.innerHTML=`<section class="cover"><div class="eyebrow">${conc()==="go"?"CRFPA · Grand oral · Libertés et droits fondamentaux":"CRFPA · Grand oral · ENM · Greffier"}</div><h1>Procedurae</h1>
+  <p class="lead">Cours, entraînement et outils pour réviser la procédure civile et la procédure prud'homale, avec un volet de droit administratif et l'étude des grands arrêts. Votre progression reste enregistrée sur cet appareil.</p>
   <div class="maj">Textes à jour au 28 octobre 2026</div>
   <div class="row" style="margin-top:16px">${[["","Tous"]].concat(Object.keys(CONC).map(k=>[k,CONC[k].t])).map(([k,n])=>`<button class="chip ${conc()===k?"on":""}" data-conc="${k}">${esc(n)}</button>`).join("")}</div>
   ${conc()?`<p class="concinfo">${esc(CONC[conc()].ep)} <span style="opacity:.8">${esc(CONC[conc()].ref)}.</span></p>`:`<p class="concinfo">Choisissez votre concours pour n'afficher que son programme.</p>`}
@@ -204,6 +207,111 @@ function vJuris(param){
   $("#jh").onchange=e=>{jHide=e.target.checked;vJuris(param)};
 }
 
+/* ---------- Étude des arrêts (droit administratif) ---------- */
+const ARR=ALL.arrets||{themes:{},list:[]};
+const TH2CH={intro:"d1",orga:"d2",juridictions:"d3",sp:"d4",police:"d5",actes:"d6",contrats:"d7",legalite:"d8",resp:"d9",contentieux:"d10"};
+const JURN={"TC":"Tribunal des conflits","CE":"Conseil d'État","CE Ass.":"Conseil d'État, Assemblée","CE Sect.":"Conseil d'État, Section","CE ord.":"Conseil d'État, ordonnance de référé","CE avis":"Conseil d'État, avis","Cons. const.":"Conseil constitutionnel"};
+const fmtA=d=>{const [y,m,j]=d.split("-").map(Number);return (j===1?"1er":j)+" "+MOIS[m-1]+" "+y};
+const arrRef=a=>a.jur+", "+fmtA(a.d);
+const arrOk=a=>{const k=conc();if(!k)return true;if(k==="go")return a.lib;return inConc(TH2CH[a.th])};
+const arrList=()=>ARR.list.filter(arrOk);
+const aBox=id=>(store.get("arr",{})[id]||{}).b||0;
+const aDue=id=>{const r=store.get("arr",{})[id];return !r||(Date.now()-r.t)>=QINT[r.b-1]*864e5};
+function recordA(id,ok){const r=store.get("arr",{}),pr=r[id]||{};r[id]={b:ok?Math.min(5,(pr.b||0)+1):1,t:Date.now(),n:(pr.n||0)+1,k:(pr.k||0)+(ok?1:0)};store.set("arr",r);logAct()}
+const AMODES={date:"Nom → date et juridiction",portee:"Nom → portée",nom:"Solution → nom de l'arrêt",chrono:"Date → nom de l'arrêt",mix:"Mélange des quatre"};
+let arTab="liste",arF={q:"",th:"",jur:"",lib:false,tri:"chrono",hide:false},aq=null,ac={cur:null,shown:false};
+function arrDistract(a,pool,how,label){
+  // how : "date" (années proches) ou "theme" (même thème d'abord)
+  let c=pool.filter(x=>x.id!==a.id);
+  if(how==="date")c=c.sort((x,y)=>Math.abs(+x.d.slice(0,4)-+a.d.slice(0,4))-Math.abs(+y.d.slice(0,4)-+a.d.slice(0,4))).slice(0,10);
+  else c=shuffle(c.filter(x=>x.th===a.th)).concat(shuffle(c.filter(x=>x.th!==a.th)));
+  const out=[],seen=new Set([label(a)]);for(const x of (how==="date"?shuffle(c):c)){const l=label(x);if(!seen.has(l)){seen.add(l);out.push(x)}if(out.length===3)break}return out;
+}
+function arrQuestion(a,mode,pool){
+  if(mode==="mix")mode=["date","portee","nom","chrono"][Math.floor(Math.random()*4)];
+  const nm=x=>x.nom;
+  if(mode==="date")return {mode,a,prompt:`Quelle est la juridiction et la date de l'arrêt « ${a.nom} » ?`,opts:shuffle([a,...arrDistract(a,pool,"date",arrRef)]),lab:arrRef};
+  if(mode==="portee")return {mode,a,prompt:`Quelle est la portée de l'arrêt « ${a.nom} » ?`,opts:shuffle([a,...arrDistract(a,pool,"theme",x=>x.portee)]),lab:x=>x.portee};
+  if(mode==="nom")return {mode,a,prompt:a.sol,sub:"Quel arrêt a posé cette solution ?",opts:shuffle([a,...arrDistract(a,pool,"theme",nm)]),lab:nm};
+  return {mode,a,prompt:`${JURN[a.jur]||a.jur}, ${fmtA(a.d)}`,sub:`Thème : ${ARR.themes[a.th]}. De quel arrêt s'agit il ?`,opts:shuffle([a,...arrDistract(a,pool,"date",nm)]),lab:nm};
+}
+function arrCard(a,open){
+  const r=store.get("arr",{})[a.id];
+  return `<div class="panel" id="a-${a.id}"><div class="row" style="justify-content:space-between;gap:8px"><span class="row" style="gap:6px">${tagCh(TH2CH[a.th])}${a.lib?`<span class="tag" style="--vc:var(--v-lib)">Libertés</span>`:""}</span><span class="row" style="gap:8px">${r?`<span class="mono small muted">Boîte ${r.b}</span>`:""}${starBtn("a:"+a.id,a.nom)}</span></div>
+  <h2 style="margin-top:8px">${esc(a.nom)}</h2><div class="ref">${esc(JURN[a.jur]||a.jur)}, ${esc(fmtA(a.d))}</div>
+  ${arF.hide&&!open?`<details style="margin-top:10px"><summary>Afficher la solution et la portée</summary><p style="margin-top:8px">${esc(a.sol)}</p><p class="small"><b>Portée.</b> ${esc(a.portee)}</p></details>`:`<p style="margin-top:10px">${esc(a.sol)}</p><p class="small"><b>Portée.</b> ${esc(a.portee)}</p>`}</div>`;
+}
+function vArrets(param){
+  const all=arrList(),st=store.get("arr",{});
+  const seen=all.filter(a=>st[a.id]).length,known=all.filter(a=>(st[a.id]||{}).b>=4).length,due=all.filter(a=>aDue(a.id)).length;
+  const head=`<h1>Étude des arrêts</h1><p class="lead">Les grands arrêts du droit administratif : retrouver la juridiction, la date, la solution et la portée à partir du seul nom, et inversement. Un arrêt réussi monte d'une boîte ; un arrêt manqué revient en boîte 1.</p>${concNote()}
+  <div class="boxes" style="grid-template-columns:repeat(4,1fr)"><div><b>${all.length}</b>Arrêts</div><div><b>${seen}</b>Déjà vus</div><div><b>${known}</b>Maîtrisés</div><div><b>${due}</b>À voir ou revoir</div></div>
+  <div class="row" style="margin:14px 0 12px">${[["liste","Liste et frise"],["quiz","Quiz"],["cartes","Cartes mémoire"]].map(([k,n])=>`<button class="chip ${arTab===k?"on":""}" data-at="${k}">${n}</button>`).join("")}</div>`;
+  const bindTabs=()=>app.querySelectorAll("[data-at]").forEach(b=>b.onclick=()=>{arTab=b.dataset.at;if(param)location.hash="arrets";else vArrets()});
+  if(param){const a=ARR.list.find(x=>x.id===param);if(a){ttl.textContent=a.nom;app.style.setProperty("--vc",vcOf(TH2CH[a.th]));app.innerHTML=head+arrCard(a,true)+`<div class="row" style="margin-top:12px"><a class="btn" href="#arrets">Tous les arrêts</a><a class="btn" href="#cours/${TH2CH[a.th]}">Chapitre : ${esc(chName(TH2CH[a.th]))}</a></div>`;bindTabs();return}}
+  if(arTab==="liste"){
+    const q=norm(arF.q).split(/\s+/).filter(Boolean);
+    let L=all.filter(a=>(!arF.th||a.th===arF.th)&&(!arF.jur||a.jur.startsWith(arF.jur))&&(!arF.lib||a.lib)&&q.every(w=>norm(a.nom+" "+a.sol+" "+a.portee+" "+a.d.slice(0,4)).includes(w)));
+    if(arF.tri==="theme")L=L.slice().sort((x,y)=>Object.keys(ARR.themes).indexOf(x.th)-Object.keys(ARR.themes).indexOf(y.th)||(x.d<y.d?-1:1));
+    let lastKey="";
+    const body=L.map(a=>{const k=arF.tri==="theme"?ARR.themes[a.th]:(Math.floor(+a.d.slice(0,4)/10)*10)+"";const h=k!==lastKey?`<h3>${esc(arF.tri==="theme"?k:"Années "+k)}</h3>`:"";lastKey=k;return h+arrCard(a)}).join("");
+    app.innerHTML=head+`<div class="searchbox">${ICO.recherche}<input type="search" id="aq" placeholder="Nom, mot clé ou année : Morsang, dignité, 1995" value="${esc(arF.q)}" aria-label="Rechercher un arrêt" autocomplete="off"></div>
+    <div class="row" style="margin:10px 0 12px"><select id="ath" aria-label="Thème"><option value="">Tous les thèmes</option>${Object.entries(ARR.themes).map(([k,v])=>`<option value="${k}" ${arF.th===k?"selected":""}>${esc(v)}</option>`).join("")}</select>
+    <select id="ajur" aria-label="Juridiction"><option value="">Toutes juridictions</option>${[["CE","Conseil d'État"],["TC","Tribunal des conflits"],["Cons. const.","Conseil constitutionnel"]].map(([k,v])=>`<option value="${k}" ${arF.jur===k?"selected":""}>${v}</option>`).join("")}</select>
+    <select id="atri" aria-label="Classement"><option value="chrono" ${arF.tri==="chrono"?"selected":""}>Frise chronologique</option><option value="theme" ${arF.tri==="theme"?"selected":""}>Par thème</option></select>
+    <label class="row small"><input type="checkbox" id="alib" ${arF.lib?"checked":""}> Libertés fondamentales</label><label class="row small"><input type="checkbox" id="ahide" ${arF.hide?"checked":""}> Masquer les solutions</label></div>
+    <p class="small muted">${L.length} arrêt${L.length>1?"s":""}</p><div class="stack" id="alist">${body||`<div class="panel"><p class="muted" style="margin:0">Aucun arrêt ne correspond.</p></div>`}</div>
+    <p class="note">Dates recoupées entre deux tables académiques des grands arrêts et, pour les décisions récentes, avec leur numéro de requête. Pensez à vérifier sur Légifrance ou sur le site du Conseil d'État avant de citer une décision dans une copie.</p>`;
+    bindTabs();
+    const upd=(k,v)=>{arF[k]=v;vArrets();if(k==="q"){const i=$("#aq");i.focus();i.setSelectionRange(i.value.length,i.value.length)}};
+    $("#aq").addEventListener("input",e=>upd("q",e.target.value));
+    $("#ath").onchange=e=>upd("th",e.target.value);$("#ajur").onchange=e=>upd("jur",e.target.value);$("#atri").onchange=e=>upd("tri",e.target.value);
+    $("#alib").onchange=e=>upd("lib",e.target.checked);$("#ahide").onchange=e=>upd("hide",e.target.checked);
+    return;
+  }
+  if(arTab==="quiz"){
+    if(!aq){
+      app.innerHTML=head+`<div class="panel"><div class="f2">
+      <div class="field"><label for="am">Exercice</label><select id="am">${Object.entries(AMODES).map(([k,v])=>`<option value="${k}">${esc(v)}</option>`).join("")}</select></div>
+      <div class="field"><label for="ath2">Thème</label><select id="ath2"><option value="">Tous les thèmes</option>${Object.entries(ARR.themes).map(([k,v])=>`<option value="${k}">${esc(v)}</option>`).join("")}</select></div>
+      <div class="field"><label for="ap">Arrêts proposés</label><select id="ap"><option value="rev">À revoir en priorité (${due})</option><option value="all">Tous, au hasard</option><option value="new">Jamais vus</option></select></div>
+      <div class="field"><label for="an">Nombre de questions</label><select id="an"><option>10</option><option selected>20</option><option>40</option></select></div></div>
+      <div class="row" style="margin-top:14px"><button class="btn primary" id="ago">Commencer</button><span class="small muted" id="ainfo"></span></div></div>`;
+      bindTabs();
+      $("#ago").onclick=()=>{const th=$("#ath2").value,p=$("#ap").value,n=+$("#an").value,base=all.filter(a=>!th||a.th===th);
+        let L=p==="new"?base.filter(a=>!st[a.id]):p==="rev"?base.filter(a=>aDue(a.id)):base;
+        L=p==="rev"?shuffle(L).sort((x,y)=>aBox(x.id)-aBox(y.id)):shuffle(L);L=L.slice(0,n);
+        if(!L.length){$("#ainfo").textContent=p==="rev"?"Aucun arrêt à revoir aujourd'hui : choisissez « Tous ».":"Aucun arrêt pour ce choix.";return}
+        const mode=$("#am").value;aq={list:L.map(a=>arrQuestion(a,mode,all.length>=4?all:ARR.list)),pos:0,score:0,ans:null};vArrets()};
+      return;
+    }
+    if(aq.pos>=aq.list.length){const err=aq.list.filter(x=>x.ko).map(x=>x.a);
+      app.innerHTML=head+`<div class="panel"><div class="big">${aq.score} / ${aq.list.length}</div><p class="muted">${err.length?"Arrêts à revoir : "+[...new Set(err.map(a=>a.nom))].map(esc).join(", ")+".":"Aucune erreur sur cette série."}</p><div class="row"><button class="btn primary" id="aagain">Nouvelle série</button></div></div>`;
+      bindTabs();$("#aagain").onclick=()=>{aq=null;vArrets()};return}
+    const Q=aq.list[aq.pos],A=aq.ans;
+    app.innerHTML=head+`<div class="row" style="justify-content:space-between">${tagCh(TH2CH[Q.a.th])}<span class="mono small muted">${aq.pos+1} / ${aq.list.length} · ${aq.score} juste${aq.score>1?"s":""}</span></div>
+    <div class="bar" style="margin:10px 0 14px"><i style="width:${aq.pos/aq.list.length*100}%"></i></div>
+    <div class="eyebrow">${esc(AMODES[Q.mode])}</div><div class="q-text">${esc(Q.prompt)}</div>${Q.sub?`<div class="small muted">${esc(Q.sub)}</div>`:""}
+    <div class="opts">${Q.opts.map((o,p)=>{let cls="";if(A!==null){if(o.id===Q.a.id)cls="good";else if(p===A)cls="bad"}return `<label class="opt ${cls}"><input type="radio" name="ao" data-p="${p}" ${A===p?"checked":""} ${A!==null?"disabled":""}><span class="L">${L[p]}</span><span class="t">${esc(Q.lab(o))}</span></label>`}).join("")}</div>
+    ${A!==null?`<div class="expl"><p class="${Q.opts[A].id===Q.a.id?"v-ok":"v-ko"}">${Q.opts[A].id===Q.a.id?"Réponse juste.":"Réponse inexacte."}</p><p><b>${esc(Q.a.nom)}</b>, ${esc(JURN[Q.a.jur]||Q.a.jur)}, ${esc(fmtA(Q.a.d))}.</p><p>${esc(Q.a.sol)}</p><p class="small"><b>Portée.</b> ${esc(Q.a.portee)}</p></div><div class="row" style="margin-top:14px"><button class="btn primary" id="anext">${aq.pos+1<aq.list.length?"Question suivante":"Voir le résultat"}</button></div>`:""}`;
+    bindTabs();
+    if(A===null)app.querySelectorAll("input[name=ao]").forEach(i=>i.onchange=()=>{const p=+i.dataset.p,ok=Q.opts[p].id===Q.a.id;aq.ans=p;if(ok)aq.score++;else Q.ko=true;recordA(Q.a.id,ok);vArrets()});
+    else $("#anext").onclick=()=>{aq.pos++;aq.ans=null;vArrets();window.scrollTo(0,0)};
+    return;
+  }
+  /* cartes mémoire */
+  const pool=all;if(!pool.length){app.innerHTML=head;bindTabs();return}
+  const pick=()=>{const w=pool.map(a=>[a,Math.pow(2,5-Math.max(1,aBox(a.id)))]);let r=Math.random()*w.reduce((s,x)=>s+x[1],0);for(const [a,x] of w){r-=x;if(r<=0&&(!ac.cur||a.id!==ac.cur.id||pool.length===1))return a}return pool[0]};
+  if(!ac.cur||!pool.includes(ac.cur))ac.cur=pick();
+  const a=ac.cur;
+  app.innerHTML=head+`<div class="panel stack" style="min-height:220px"><div class="row" style="justify-content:space-between">${tagCh(TH2CH[a.th])}<span class="row" style="gap:8px"><span class="mono small muted">Boîte ${Math.max(1,aBox(a.id))}</span>${starBtn("a:"+a.id,a.nom)}</span></div>
+  <div class="q-text">${esc(a.nom)}</div><div class="small muted">Juridiction, date, solution, portée ?</div>
+  ${ac.shown?`<div class="expl"><p><b>${esc(JURN[a.jur]||a.jur)}, ${esc(fmtA(a.d))}</b></p><p>${esc(a.sol)}</p><p class="small"><b>Portée.</b> ${esc(a.portee)}</p></div><div class="row"><button class="btn ok" id="ay">Je savais</button><button class="btn ko" id="an2">À revoir</button></div>`:`<div class="row"><button class="btn primary" id="ash">Retourner la carte</button></div>`}</div>`;
+  bindTabs();
+  if(!ac.shown)$("#ash").onclick=()=>{ac.shown=true;vArrets()};
+  else{const g=ok=>{recordA(a.id,ok);ac={cur:null,shown:false};vArrets()};$("#ay").onclick=()=>g(true);$("#an2").onclick=()=>g(false)}
+}
+
 /* ---------- Tableau des délais ---------- */
 const DUR=["15 jours","1 mois","2 mois","3 mois","5 mois","6 mois","1 an","2 ans","3 ans","5 ans","10 ans","30 ans"];
 let dChecked=false;
@@ -292,7 +400,7 @@ const paras=c=>Array.isArray(c)?c:[c];
 const cpara=t=>{const m=/^(Problème|Règle|Application|Conclusion|Point de vigilance|Principe|Définition|Conditions|Effets|Régime|Procédure|Composition|Pouvoirs|Délais|Limites|Rôle du greffe|Fonctionnement|Sections|Formations|Hypothèse|Appel|Requête|Réforme|Greffe|Mesures|Plafond|Défendeur|Demandeur|Renvoi|Personnes habilitées|Défenseur syndical|Mineurs|Saisines particulières|Intérêt et portée|Formation incomplète|Opposition et pourvoi|Cas particuliers|Exécution et appel|Rapport de la caducité|Mesures provisoires|Renvoi au fond|Procédure accélérée au fond|Juridiction paritaire)\. /.exec(t);return m?`<p><b>${esc(m[1])}.</b> ${esc(t.slice(m[0].length))}</p>`:`<p>${esc(t)}</p>`};
 function exportDoc(name,titre,meta,enonce,qs){
   const P=cpara;
-  const body=`<h1>${esc(titre)}</h1>${meta?`<p class="meta">${esc(meta)}</p>`:""}<h2>Énoncé</h2>${P(enonce)}`+qs.map((q,i)=>`<h2>${qs.length>1?"Question "+(i+1):"Sujet"}</h2><p><b>${esc(q.q)}</b></p><h3>Corrigé</h3>${paras(q.corr).map(P).join("")}${q.grille?`<h3>Éléments attendus</h3><ul>${q.grille.map(g=>`<li>${esc(g[0])} (${fmtN(g[1])} pt)</li>`).join("")}</ul>`:""}`).join("")+`<p class="meta">Atelier de procédure. Corrigé d'entraînement établi d'après les textes en vigueur au 28 octobre 2026 ; vérifiez toujours les textes applicables.</p>`;
+  const body=`<h1>${esc(titre)}</h1>${meta?`<p class="meta">${esc(meta)}</p>`:""}<h2>Énoncé</h2>${P(enonce)}`+qs.map((q,i)=>`<h2>${qs.length>1?"Question "+(i+1):"Sujet"}</h2><p><b>${esc(q.q)}</b></p><h3>Corrigé</h3>${paras(q.corr).map(P).join("")}${q.grille?`<h3>Éléments attendus</h3><ul>${q.grille.map(g=>`<li>${esc(g[0])} (${fmtN(g[1])} pt)</li>`).join("")}</ul>`:""}`).join("")+`<p class="meta">Procedurae. Corrigé d'entraînement établi d'après les textes en vigueur au 28 octobre 2026 ; vérifiez toujours les textes applicables.</p>`;
   const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>${esc(titre)}</title><style>@page{size:21cm 29.7cm;margin:2.5cm}body,p,li,h1,h2,h3{font-family:"Times New Roman",serif;font-size:12pt}body{line-height:1.15}h1{font-weight:bold;text-align:center;margin:0 0 12pt}h2{font-weight:bold;margin:14pt 0 6pt}h3{font-weight:bold;font-style:italic;margin:10pt 0 4pt}p{text-align:justify;margin:0 0 6pt}.meta{font-style:italic}</style></head><body>${body}</body></html>`;
   const blob=new Blob(["﻿"+html],{type:"application/msword"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name.replace(/[^\wÀ-ÿ-]+/g,"-").replace(/-+/g,"-").toLowerCase()+".doc";document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500);toast("Corrigé exporté au format Word");
 }
@@ -365,7 +473,7 @@ function vEntretien(param){
 /* ---------- Mentions légales ---------- */
 function vMentions(){ttl.textContent="Mentions légales";
   app.innerHTML=`<h1>Mentions légales</h1>
-  <div class="panel"><h3 style="margin-top:0">Objet du site</h3><p>L'Atelier de procédure est un projet pédagogique, gratuit et non commercial, qui vise à aider les étudiants dans leurs révisions de la procédure civile, de la procédure prud'homale et de la culture juridique, en vue des concours et examens (CRFPA, ENM, concours de greffier). Il ne se substitue pas aux enseignements dispensés par les universités, les instituts d'études judiciaires et les organismes de préparation, ni aux conseils des enseignants.</p></div>
+  <div class="panel"><h3 style="margin-top:0">Objet du site</h3><p>Procedurae est un projet pédagogique, gratuit et non commercial, qui vise à aider les étudiants dans leurs révisions de la procédure civile, de la procédure prud'homale et de la culture juridique, en vue des concours et examens (CRFPA, ENM, concours de greffier). Il ne se substitue pas aux enseignements dispensés par les universités, les instituts d'études judiciaires et les organismes de préparation, ni aux conseils des enseignants.</p></div>
   <div class="panel" style="margin-top:12px"><h3 style="margin-top:0">Mise à jour et responsabilité</h3><p>Le site est régulièrement mis à jour. Les contenus sont établis d'après les textes en vigueur au 28 octobre 2026, date indiquée sur la page d'accueil. Il revient toutefois à l'utilisateur de vérifier les textes et les contenus avant toute utilisation, notamment sur <a href="https://www.legifrance.gouv.fr" target="_blank" rel="noopener" style="color:var(--accent)">Légifrance</a>. Les contenus ne constituent pas une consultation juridique.</p></div>
   <div class="panel" style="margin-top:12px"><h3 style="margin-top:0">Signaler une erreur ou une évolution des textes</h3><p>Le site est destiné à un cercle restreint d'étudiants. Une erreur, une réforme ou une jurisprudence nouvelle peut être signalée directement à l'enseignant, en cours ou par les moyens de contact habituels.</p></div>
   <div class="panel" style="margin-top:12px"><h3 style="margin-top:0">Éditeur et hébergeur</h3><p>Éditeur et directeur de la publication : Paul Morris. Contact : par l'intermédiaire de l'enseignant, en cours ou par les moyens de contact habituels.</p><p>Hébergeur : GitHub, Inc., 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, États Unis.</p></div>
@@ -438,7 +546,7 @@ function vBord(){
   <div class="row"><button class="btn" id="bexp">Exporter ma progression</button><label class="btn" for="bimp">Importer une sauvegarde</label><input type="file" id="bimp" accept=".json,application/json" hidden></div><p class="small muted" id="bmsg" style="margin:8px 0 0"></p></div>
   <p class="note">Les QCM sont comptés selon la dernière tentative ; les qualifications et l'activité ne sont suivies que depuis la version 8.</p>`;
   $("#bexp").onclick=()=>{const o={app:"atelier-procedure-civile",v:1,date:new Date().toISOString(),data:{}};try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k.startsWith("apc-"))o.data[k]=localStorage.getItem(k)}}catch(e){}
-    const b=new Blob([JSON.stringify(o)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="atelier-progression-"+dayKey()+".json";document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500);$("#bmsg").textContent="Fichier de sauvegarde créé."};
+    const b=new Blob([JSON.stringify(o)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="procedurae-progression-"+dayKey()+".json";document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500);$("#bmsg").textContent="Fichier de sauvegarde créé."};
   $("#bimp").onchange=e=>{const file=e.target.files[0];if(!file)return;const rd=new FileReader();rd.onload=()=>{try{const o=JSON.parse(rd.result);if(o.app!=="atelier-procedure-civile"||!o.data)throw 0;const ks=Object.keys(o.data).filter(k=>k.startsWith("apc-"));
       if(!confirmImp){confirmImp=o;$("#bmsg").innerHTML="Sauvegarde du "+esc(fmtD(new Date(o.date)))+" lue ("+ks.length+" éléments). Elle remplacera la progression actuelle. <button class='btn ko' id='bok'>Confirmer l'import</button>";$("#bok").onclick=()=>{try{ks.forEach(k=>localStorage.setItem(k,confirmImp.data[k]))}catch(er){}confirmImp=null;applyConc();vBord();$("#bmsg").textContent="Progression importée."};}
     }catch(er){$("#bmsg").textContent="Ce fichier n'est pas une sauvegarde valide de l'application."}e.target.value=""};rd.readAsText(file)};
@@ -446,7 +554,7 @@ function vBord(){
 }
 const fmtD=d=>d.getDate()+" "+["janv.","févr.","mars","avr.","mai","juin","juil.","août","sept.","oct.","nov.","déc."][d.getMonth()];
 
-function resetViews(){qs=null;fs_={cur:null,shown:false,c:null};qq=null;ex=null}
+function resetViews(){aq=null;qs=null;fs_={cur:null,shown:false,c:null};qq=null;ex=null}
 /* ---------- Recherche ---------- */
 let sq="";
 function searchIndex(){
@@ -455,6 +563,7 @@ function searchIndex(){
   ALL.fiches.forEach(f=>I.push({k:"Fiche",c:f.c,t:f.q,x:f.a+" "+f.r,fid:f.id,body:`<p>${esc(f.a)}</p><div class="ref">${esc(f.r)}</div>`}));
   ALL.qcm.forEach(q=>I.push({k:"QCM",c:q.c,t:q.q,x:q.o.map(o=>o[0]).join(" ")+" "+q.e,qid:q.id,body:`<p class="small"><b>Réponses exactes :</b> ${q.o.filter(o=>o[1]).map(o=>esc(o[0])).join(" ; ")}</p><p class="small">${esc(q.e)}</p><div class="ref">${q.r.map(esc).join(" · ")}</div>`}));
   ALL.juris.forEach(j=>I.push({k:"Arrêt",c:j.c,t:j.nom+" · "+j.ref,x:j.sol+" "+j.portee,jn:j.nom,body:`<p>${esc(j.sol)}</p><p class="small muted">${esc(j.portee)}</p>`}));
+  ARR.list.forEach(a=>I.push({k:"Arrêt",c:TH2CH[a.th],t:a.nom+" · "+arrRef(a),x:a.sol+" "+a.portee,an:a.id,body:`<p>${esc(a.sol)}</p><p class="small muted">${esc(a.portee)}</p><a class="small" href="#arrets/${a.id}">Ouvrir dans l'étude des arrêts</a>`}));
   (window.SUJETS||[]).forEach(s=>I.push({k:"Sujet "+CONC[s.conc].t,c:null,t:s.titre,x:s.enonce+" "+s.questions.map(q=>q.q+" "+q.corr.join(" ")).join(" "),h:"#sujets/"+s.id}));
   ALL.cas.forEach((c,i)=>I.push({k:"Cas pratique",c:c.c,t:c.titre,x:c.enonce+" "+c.questions.map(q=>q.q+" "+paras(q.corr).join(" ")).join(" "),h:"#cas/"+i}));
   ALL.delais.forEach(d=>I.push({k:"Délai",c:delaiCh(d),t:d.a,x:d.d+" "+d.dep+" "+d.s+" "+d.t,body:`<p class="small"><b>${esc(d.d)}</b> · départ : ${esc(d.dep)}${d.s?" · sanction : "+esc(d.s):""}</p><div class="ref">${esc(d.t)}</div>`}));
@@ -469,7 +578,7 @@ function vRecherche(){
   const run=()=>{sq=$("#sq").value;const terms=norm(sq).split(/\s+/).filter(w=>w.length>1);const box=$("#sres");
     if(!terms.length){box.innerHTML=`<p class="muted small">Suggestions : ${["exécution provisoire","péremption","1448","médiation","astreinte","récusation","750-1"].map(w=>`<button class="chip" data-s="${esc(w)}">${esc(w)}</button>`).join(" ")}</p>`;box.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{$("#sq").value=b.dataset.s;run()});return}
     const R=searchIndex().filter(e=>(!e.c||inConc(e.c))&&terms.every(w=>e.n.includes(w))).map(e=>({e,s:terms.reduce((a,w)=>a+(norm(e.t).includes(w)?3:0),0)})).sort((a,b)=>b.s-a.s).slice(0,80);
-    box.innerHTML=R.length?`<p class="small muted">${R.length}${R.length===80?" premiers":""} résultat${R.length>1?"s":""}</p><div class="stack">${R.map(({e})=>{const head=`<div class="row" style="justify-content:space-between;gap:8px"><span class="row" style="gap:6px"><span class="tag" style="--vc:${e.c?vcOf(e.c):"var(--accent)"}">${esc(e.k)}</span>${e.c?`<span class="small muted">${esc(chName(e.c))}</span>`:""}</span>${e.qid?starBtn("q:"+e.qid,"question"):e.fid?starBtn("f:"+e.fid,"fiche"):e.jn?starBtn("j:"+e.jn,e.jn):""}</div><div style="font-weight:700;margin-top:6px">${hl(e.t,terms)}</div>`;
+    box.innerHTML=R.length?`<p class="small muted">${R.length}${R.length===80?" premiers":""} résultat${R.length>1?"s":""}</p><div class="stack">${R.map(({e})=>{const head=`<div class="row" style="justify-content:space-between;gap:8px"><span class="row" style="gap:6px"><span class="tag" style="--vc:${e.c?vcOf(e.c):"var(--accent)"}">${esc(e.k)}</span>${e.c?`<span class="small muted">${esc(chName(e.c))}</span>`:""}</span>${e.qid?starBtn("q:"+e.qid,"question"):e.fid?starBtn("f:"+e.fid,"fiche"):e.jn?starBtn("j:"+e.jn,e.jn):e.an?starBtn("a:"+e.an,"arrêt"):""}</div><div style="font-weight:700;margin-top:6px">${hl(e.t,terms)}</div>`;
       return e.h?`<a class="panel hit" href="${e.h}">${head}<p class="snip">${snippet(e.x,terms)}</p></a>`:`<div class="panel">${head}<p class="snip small muted" style="margin:4px 0 0">${snippet(e.x,terms)}</p><details style="margin-top:8px"><summary>Afficher</summary><div style="margin-top:8px">${e.body}</div></details></div>`}).join("")}</div>`:`<div class="panel"><p class="muted" style="margin:0">Aucun résultat pour « ${esc(sq)} ». Essayez un terme plus court ou un numéro d'article seul.</p></div>`};
   $("#sq").addEventListener("input",run);run();setTimeout(()=>{try{$("#sq").focus()}catch(e){}},50);
 }
@@ -481,6 +590,7 @@ function vFavoris(){
     if(ty==="q"){const q=ALL.qcm.find(x=>x.id===id);return q&&{g:"QCM",c:q.c,html:`<div class="q-text" style="font-size:1.02rem">${esc(q.q)}</div><details style="margin-top:8px"><summary>Voir la correction</summary><p class="small" style="margin-top:8px"><b>Réponses exactes :</b> ${q.o.filter(o=>o[1]).map(o=>esc(o[0])).join(" ; ")}</p><p class="small">${esc(q.e)}</p><div class="ref">${q.r.map(esc).join(" · ")}</div></details>`}}
     if(ty==="f"){const f=ALL.fiches.find(x=>x.id===id);return f&&{g:"Fiches",c:f.c,html:`<div style="font-weight:700">${esc(f.q)}</div><details style="margin-top:8px"><summary>Voir la réponse</summary><p style="margin-top:8px">${esc(f.a)}</p><div class="ref">${esc(f.r)}</div></details>`}}
     if(ty==="j"){const j=ALL.juris.find(x=>x.nom===id);return j&&{g:"Arrêts",c:j.c,html:`<div style="font-weight:700">${esc(j.nom)}</div><div class="ref">${esc(j.ref)}</div><p style="margin:8px 0 0">${esc(j.sol)}</p>`}}
+    if(ty==="a"){const a=ARR.list.find(x=>x.id===id);return a&&{g:"Arrêts",c:TH2CH[a.th],html:`<div style="font-weight:700">${esc(a.nom)}</div><div class="ref">${esc(arrRef(a))}</div><p style="margin:8px 0 0">${esc(a.sol)}</p>`}}
     if(ty==="c"){const c=CH.find(x=>x.id===id);return c&&{g:"Chapitres",c:c.id,html:`<a href="#cours/${c.id}" style="font-weight:700;text-decoration:none">${esc(c.titre)}</a>`}}
     if(ty==="s"){const s=(window.SUJETS||[]).find(x=>x.id===id);return s&&{g:"Sujets",c:null,html:`<a href="#sujets/${s.id}" style="font-weight:700;text-decoration:none">${esc(s.titre)}</a><div class="small muted">${esc(CONC[s.conc].t)} · ${esc(s.type)}</div>`}}
     return null};
@@ -498,7 +608,7 @@ function vImprimer(param){
   ttl.textContent="Imprimer : "+c.titre;app.style.setProperty("--vc",vcOf(c.id));
   const F=ALL.fiches.filter(f=>f.c===c.id),J=ALL.juris.filter(j=>j.c===c.id);
   app.innerHTML=`<div class="panel noprint" style="margin-bottom:18px"><p style="margin:0 0 10px">Version imprimable du chapitre, avec ses fiches mémoire et ses arrêts. Pour un PDF, choisissez « Enregistrer au format PDF » comme imprimante.</p><div class="row"><button class="btn primary" id="pgo">${ICO.imprimer.replace('<svg','<svg width="18" height="18"')} Imprimer ou enregistrer en PDF</button><a class="btn" href="#cours/${c.id}">Retour au chapitre</a></div><p class="small muted" id="pmsg" style="margin:8px 0 0"></p></div>
-  <div class="eyebrow" style="color:var(--vc)">${esc((VO.find(v=>v.id===c.v)||{}).titre||"")} · Atelier de procédure</div><h1>${esc(c.titre)}</h1>
+  <div class="eyebrow" style="color:var(--vc)">${esc((VO.find(v=>v.id===c.v)||{}).titre||"")} · Procedurae</div><h1>${esc(c.titre)}</h1>
   ${c.sections.map(s=>`<div class="sec"><h3>${esc(s.h)}</h3>${s.p.map(p=>`<p>${esc(p)}</p>`).join("")}</div>`).join("")}
   ${F.length?`<h2 style="margin-top:26px">Fiches mémoire</h2><div class="stack">${F.map(f=>`<div class="panel"><div style="font-weight:700">${esc(f.q)}</div><p style="margin:6px 0 4px">${esc(f.a)}</p><div class="ref">${esc(f.r)}</div></div>`).join("")}</div>`:""}
   ${J.length?`<h2 style="margin-top:26px">Arrêts</h2><div class="stack">${J.map(j=>`<div class="panel"><div style="font-weight:700">${esc(j.nom)}</div><div class="ref">${esc(j.ref)}</div><p style="margin:6px 0 4px">${esc(j.sol)}</p><p class="small muted" style="margin:0">${esc(j.portee)}</p></div>`).join("")}</div>`:""}
@@ -618,12 +728,12 @@ function vDissert(param){
 }
 
 /* ---------- Routeur ---------- */
-const VIEWS={recherche:vRecherche,favoris:vFavoris,imprimer:vImprimer,sujets:vSujets,entretien:vEntretien,mentions:vMentions,examen:vExam,bord:vBord,cours:vCours,qcm:vQcm,fiches:vFiches,juris:vJuris,delais:vDelais,calcul:vCalcul,qualif:vQualif,cas:vCas,doctrine:vDoctrine,dissert:vDissert};
+const VIEWS={arrets:vArrets,recherche:vRecherche,favoris:vFavoris,imprimer:vImprimer,sujets:vSujets,entretien:vEntretien,mentions:vMentions,examen:vExam,bord:vBord,cours:vCours,qcm:vQcm,fiches:vFiches,juris:vJuris,delais:vDelais,calcul:vCalcul,qualif:vQualif,cas:vCas,doctrine:vDoctrine,dissert:vDissert};
 function route(){
   const [v,p]=location.hash.slice(1).split("/");
   const m=MODULES.find(x=>x.id===v)||(v==="imprimer"?{t:"Imprimer"}:v==="mentions"?{t:"Mentions légales"}:null);
-  back.hidden=!m; ttl.textContent=m?m.t:"Atelier de procédure";
-  back.href=(p&&["cours","cas","doctrine","dissert","sujets","entretien"].includes(v))?"#"+v:(v==="imprimer"&&p?"#cours/"+p:"#");
+  back.hidden=!m; ttl.textContent=m?m.t:"Procedurae";
+  back.href=(p&&["cours","cas","doctrine","dissert","sujets","entretien","arrets"].includes(v))?"#"+v:(v==="imprimer"&&p?"#cours/"+p:"#");
   document.querySelectorAll(".top .act a:not(#themeBtn)").forEach(a=>a.classList.toggle("on",a.getAttribute("href")==="#"+v));
   if(!["cours","imprimer"].includes(v))app.style.removeProperty("--vc");
   (VIEWS[v]||vHome)(p);
