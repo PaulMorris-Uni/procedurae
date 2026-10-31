@@ -3,6 +3,7 @@
 const ALL=window.DATA, CH=window.CHAPITRES, VO=window.VOLETS, D={};
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const fx=f=>f&&f.x&&f.x.length?`<ul class="fx">${f.x.map(([l,t])=>`<li><b>${esc(l)}.</b> ${esc(t)}</li>`).join("")}</ul>`:"";
 const store={get(k,d){try{const v=localStorage.getItem("apc-"+k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem("apc-"+k,JSON.stringify(v))}catch(e){}}};
 const chName=id=>(CH.find(c=>c.id===id)||{}).titre||id;
 const shuffle=a=>{a=a.slice();for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a};
@@ -106,7 +107,7 @@ function vHome(){
   ${conc()?`<p class="concinfo">${esc(CONC[conc()].ep)} <span style="opacity:.8">${esc(CONC[conc()].ref)}.</span></p>`:`<p class="concinfo">Choisissez votre concours pour n'afficher que son programme.</p>`}
   <div class="stats"><div><b>${done.length}/${D.qcm.length}</b><span>QCM traités</span></div><div><b>${done.length?Math.round(ok/done.length*100):0} %</b><span>QCM réussis</span></div><div><b>${known}/${D.fiches.length}</b><span>Fiches maîtrisées</span></div></div>
   </section>
-  <div class="panel" id="iosInst" hidden style="margin-top:16px;margin-bottom:4px"><b>Installer l'application sur iPhone ou iPad</b><ol class="small" style="margin:8px 0 10px;padding-left:20px"><li>Ouvrez ce site dans Safari.</li><li>Touchez le bouton Partager (le carré avec une flèche vers le haut), en bas ou en haut de l'écran.</li><li>Choisissez « Sur l'écran d'accueil », puis « Ajouter ».</li></ol><p class="small muted" style="margin:0 0 10px">L'application s'ouvre alors en plein écran et fonctionne hors connexion. Tant qu'elle n'est pas installée, Safari peut effacer votre progression après sept jours sans visite : pensez à l'exporter depuis le <a href="#bord" style="color:var(--accent)">tableau de bord</a>.</p><button class="btn" id="iosLater">Masquer ce message</button></div>
+  <div class="panel" id="iosInst" hidden style="margin-top:16px;margin-bottom:4px"><b>Installer l'application sur iPhone ou iPad</b><p class="small" style="margin:8px 0 6px">Sur iPhone, il n'existe pas de bouton « Télécharger » : l'application s'installe depuis le navigateur, en quelques gestes.</p><ol class="small" style="margin:0 0 10px;padding-left:20px"><li>Ouvrez l'adresse du site dans Safari (le lien de prévisualisation reçu par message ne permet pas l'installation).</li><li>Touchez le bouton Partager (le carré avec une flèche vers le haut). S'il n'apparaît pas, touchez d'abord le bouton « ⋯ » situé à côté de la barre d'adresse, puis « Partager ».</li><li>Faites défiler la liste et choisissez « Sur l'écran d'accueil » (ou « Ajouter à l'écran d'accueil »). Si l'option « Ouvrir en tant qu'app web » est proposée, laissez la activée.</li><li>Touchez « Ajouter » : l'icône Procedurae apparaît sur l'écran d'accueil.</li></ol><p class="small muted" style="margin:0 0 8px">Avec Chrome sur iPhone, la démarche est la même : bouton Partager dans la barre d'adresse, puis « Ajouter à l'écran d'accueil ».</p><p class="small muted" style="margin:0 0 10px">L'application s'ouvre alors en plein écran et fonctionne hors connexion. Tant qu'elle n'est pas installée, Safari peut effacer votre progression après sept jours sans visite : pensez à l'exporter depuis le <a href="#bord" style="color:var(--accent)">tableau de bord</a>.</p><button class="btn" id="iosLater">Masquer ce message</button></div><button class="btn" id="iosShow" hidden style="margin-top:12px">Installer l'application sur iPhone</button>
   <div class="volets">${VO.filter(v=>CH.some(c=>c.v===v.id&&inConc(c.id))).map(v=>`<a class="vchip" style="--vc:${VCOL[v.id]}" href="#cours/v:${v.id}"><i></i>${esc(v.titre)}</a>`).join("")}</div>
   <div class="row" style="margin-top:14px">${due?`<a class="btn primary" href="#qcm">${due} QCM à réviser aujourd'hui</a>`:`<a class="btn primary" href="#qcm">Lancer une série de QCM</a>`}<a class="btn" href="#bord">${ICO.bord.replace('<svg','<svg width="18" height="18"')} Tableau de bord</a></div>
   ${GR.map(([g,lab])=>`<div class="grp">${lab}</div><div class="grid">${MODULES.filter(m=>m.g===g).map((m,i,arr)=>`<a class="tile ${i<(3-arr.length%3)%3?"wide":""}" href="#${m.id}"><span class="ico">${ICO[m.id]||""}</span><span class="n">${m.n()}</span><b>${m.t}</b><span>${m.d}</span></a>`).join("")}</div>`).join("")}
@@ -115,7 +116,7 @@ function vHome(){
   <p class="note"><a href="#mentions" style="color:var(--accent)">Mentions légales</a></p>
   <p class="note"><button class="btn" id="wipe">Effacer toute ma progression</button></p>`;
   app.querySelectorAll("[data-conc]").forEach(b=>b.onclick=()=>{store.set("conc",b.dataset.conc);applyConc();resetViews();vHome()});
-  if(IOS&&!STANDALONE&&!store.get("iosHide",0)){const h=$("#iosInst");h.hidden=false;$("#iosLater").onclick=()=>{store.set("iosHide",1);h.hidden=true}}
+  if(IOS&&!STANDALONE){const h=$("#iosInst"),sh=$("#iosShow");if(!store.get("iosHide",0))h.hidden=false;else if(sh)sh.hidden=false;$("#iosLater").onclick=()=>{store.set("iosHide",1);h.hidden=true;if(sh)sh.hidden=false};if(sh)sh.onclick=()=>{h.hidden=false;sh.hidden=true;h.scrollIntoView({behavior:"smooth"})}}
   if(deferredPrompt&&!IOS){$("#inst").hidden=false;$("#instBtn").onclick=async()=>{deferredPrompt.prompt();deferredPrompt=null;$("#inst").hidden=true}}
   $("#wipe").onclick=e=>{const b=e.target;if(b.dataset.c){["qcm","fbox","dans","cas","act","qual","suj","fav"].forEach(k=>store.set(k,{}));store.set("exams",[]);b.textContent="Progression effacée";delete b.dataset.c;setTimeout(()=>route(),800)}else{b.dataset.c=1;b.textContent="Confirmer l'effacement"}};
 }
@@ -190,7 +191,7 @@ function vFiches(param){
   <div class="boxes">${counts.map((c,k)=>`<div><b>${c}</b>Boîte ${k+1}</div>`).join("")}</div>
   <div class="panel stack" style="margin-top:12px;min-height:220px"><div class="row" style="justify-content:space-between">${tagCh(f.c)}<span class="row" style="gap:8px"><span class="mono small muted">Boîte ${box[f.id]||1}</span>${starBtn("f:"+f.id,"fiche")}</span></div>
   <div class="q-text">${esc(f.q)}</div>
-  ${fs_.shown?`<div class="expl"><p>${esc(f.a)}</p><div class="ref">${esc(f.r)}</div></div><div class="row"><button class="btn ok" id="fy">Je savais</button><button class="btn ko" id="fn">À revoir</button></div>`:`<div class="row"><button class="btn primary" id="fs">Voir la réponse</button></div>`}</div>`;
+  ${fs_.shown?`<div class="expl"><p>${esc(f.a)}</p>${fx(f)}<div class="ref">${esc(f.r)}</div></div><div class="row"><button class="btn ok" id="fy">Je savais</button><button class="btn ko" id="fn">À revoir</button></div>`:`<div class="row"><button class="btn primary" id="fs">Voir la réponse</button></div>`}</div>`;
   $("#fc").onchange=e=>{location.hash="fiches"+(e.target.value?"/"+e.target.value:"")};
   if(!fs_.shown)$("#fs").onclick=()=>{fs_.shown=true;vFiches(param)};
   else{const grade=up=>{const b=store.get("fbox",{});b[f.id]=up?Math.min(5,(b[f.id]||1)+1):1;store.set("fbox",b);logAct();fs_.shown=false;fs_.cur=null;vFiches(param)};$("#fy").onclick=()=>grade(true);$("#fn").onclick=()=>grade(false)}
@@ -583,7 +584,7 @@ let sq="";
 function searchIndex(){
   if(searchIndex.c)return searchIndex.c;const I=[];
   CH.forEach(c=>c.sections.forEach(s=>I.push({k:"Cours",c:c.id,t:c.titre+" · "+s.h,x:s.p.join(" "),h:"#cours/"+c.id})));
-  ALL.fiches.forEach(f=>I.push({k:"Fiche",c:f.c,t:f.q,x:f.a+" "+f.r,fid:f.id,body:`<p>${esc(f.a)}</p><div class="ref">${esc(f.r)}</div>`}));
+  ALL.fiches.forEach(f=>I.push({k:"Fiche",c:f.c,t:f.q,x:f.a+" "+f.r,fid:f.id,body:`<p>${esc(f.a)}</p>${fx(f)}<div class="ref">${esc(f.r)}</div>`}));
   ALL.qcm.forEach(q=>I.push({k:"QCM",c:q.c,t:q.q,x:q.o.map(o=>o[0]).join(" ")+" "+q.e,qid:q.id,body:`<p class="small"><b>Réponses exactes :</b> ${q.o.filter(o=>o[1]).map(o=>esc(o[0])).join(" ; ")}</p><p class="small">${esc(q.e)}</p><div class="ref">${q.r.map(esc).join(" · ")}</div>`}));
   ALL.juris.forEach(j=>I.push({k:"Arrêt",c:j.c,t:j.nom+" · "+j.ref,x:j.sol+" "+j.portee,jn:j.nom,body:`<p>${esc(j.sol)}</p><p class="small muted">${esc(j.portee)}</p>`}));
   ARR.list.forEach(a=>I.push({k:"Arrêt",c:TH2CH[a.th],t:a.nom+" · "+arrRef(a),x:a.sol+" "+a.portee,an:a.id,body:`<p>${esc(a.sol)}</p><p class="small muted">${esc(a.portee)}</p><a class="small" href="#arrets/${a.id}">Ouvrir dans l'étude des arrêts</a>`}));
@@ -611,7 +612,7 @@ function vFavoris(){
   const F=favs(),ks=Object.keys(F).sort((a,b)=>F[b]-F[a]);
   const item=k=>{const [ty,...r]=k.split(":"),id=r.join(":");
     if(ty==="q"){const q=ALL.qcm.find(x=>x.id===id);return q&&{g:"QCM",c:q.c,html:`<div class="q-text" style="font-size:1.02rem">${esc(q.q)}</div><details style="margin-top:8px"><summary>Voir la correction</summary><p class="small" style="margin-top:8px"><b>Réponses exactes :</b> ${q.o.filter(o=>o[1]).map(o=>esc(o[0])).join(" ; ")}</p><p class="small">${esc(q.e)}</p><div class="ref">${q.r.map(esc).join(" · ")}</div></details>`}}
-    if(ty==="f"){const f=ALL.fiches.find(x=>x.id===id);return f&&{g:"Fiches",c:f.c,html:`<div style="font-weight:700">${esc(f.q)}</div><details style="margin-top:8px"><summary>Voir la réponse</summary><p style="margin-top:8px">${esc(f.a)}</p><div class="ref">${esc(f.r)}</div></details>`}}
+    if(ty==="f"){const f=ALL.fiches.find(x=>x.id===id);return f&&{g:"Fiches",c:f.c,html:`<div style="font-weight:700">${esc(f.q)}</div><details style="margin-top:8px"><summary>Voir la réponse</summary><p style="margin-top:8px">${esc(f.a)}</p>${fx(f)}<div class="ref">${esc(f.r)}</div></details>`}}
     if(ty==="j"){const j=ALL.juris.find(x=>x.nom===id);return j&&{g:"Arrêts",c:j.c,html:`<div style="font-weight:700">${esc(j.nom)}</div><div class="ref">${esc(j.ref)}</div><p style="margin:8px 0 0">${esc(j.sol)}</p>`}}
     if(ty==="a"){const a=ARR.list.find(x=>x.id===id);return a&&{g:"Arrêts",c:TH2CH[a.th],html:`<div style="font-weight:700">${esc(a.nom)}</div><div class="ref">${esc(arrRef(a))}</div><p style="margin:8px 0 0">${esc(a.sol)}</p>`}}
     if(ty==="c"){const c=CH.find(x=>x.id===id);return c&&{g:"Chapitres",c:c.id,html:`<a href="#cours/${c.id}" style="font-weight:700;text-decoration:none">${esc(c.titre)}</a>`}}
@@ -633,7 +634,7 @@ function vImprimer(param){
   app.innerHTML=`<div class="panel noprint" style="margin-bottom:18px"><p style="margin:0 0 10px">Version imprimable du chapitre, avec ses fiches mémoire et ses arrêts. Pour un PDF, choisissez « Enregistrer au format PDF » comme imprimante.</p><div class="row"><button class="btn primary" id="pgo">${ICO.imprimer.replace('<svg','<svg width="18" height="18"')} Imprimer ou enregistrer en PDF</button><a class="btn" href="#cours/${c.id}">Retour au chapitre</a></div><p class="small muted" id="pmsg" style="margin:8px 0 0"></p></div>
   <div class="eyebrow" style="color:var(--vc)">${esc((VO.find(v=>v.id===c.v)||{}).titre||"")} · Procedurae</div><h1>${esc(c.titre)}</h1>
   ${c.sections.map(s=>`<div class="sec"><h3>${esc(s.h)}</h3>${s.p.map(p=>`<p>${esc(p)}</p>`).join("")}</div>`).join("")}
-  ${F.length?`<h2 style="margin-top:26px">Fiches mémoire</h2><div class="stack">${F.map(f=>`<div class="panel"><div style="font-weight:700">${esc(f.q)}</div><p style="margin:6px 0 4px">${esc(f.a)}</p><div class="ref">${esc(f.r)}</div></div>`).join("")}</div>`:""}
+  ${F.length?`<h2 style="margin-top:26px">Fiches mémoire</h2><div class="stack">${F.map(f=>`<div class="panel"><div style="font-weight:700">${esc(f.q)}</div><p style="margin:6px 0 4px">${esc(f.a)}</p>${fx(f)}<div class="ref">${esc(f.r)}</div></div>`).join("")}</div>`:""}
   ${J.length?`<h2 style="margin-top:26px">Arrêts</h2><div class="stack">${J.map(j=>`<div class="panel"><div style="font-weight:700">${esc(j.nom)}</div><div class="ref">${esc(j.ref)}</div><p style="margin:6px 0 4px">${esc(j.sol)}</p><p class="small muted" style="margin:0">${esc(j.portee)}</p></div>`).join("")}</div>`:""}
   <p class="note">Textes à jour au 28 octobre 2026. Support d'entraînement : vérifiez toujours les textes en vigueur.</p>`;
   $("#pgo").onclick=()=>{try{window.print()}catch(e){}$("#pmsg").textContent="Si la fenêtre d'impression ne s'ouvre pas, utilisez la commande Imprimer de votre navigateur (Ctrl+P ou menu Partager sur téléphone)."};
